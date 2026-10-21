@@ -1,0 +1,38 @@
+{
+  "packet": "PKT-24006",
+  "received": "2026-09-14",
+  "po": {
+    "po": "PO-31960",
+    "line": 1,
+    "buyer": "Larkspur Precision Machining",
+    "supplier": "Brannock Metals Supply",
+    "item": "4140 alloy steel round bar, 2.000 in diameter, annealed",
+    "quantity": "12 ft x 6 bars",
+    "spec": "HLS-4140",
+    "spec_revision": "C",
+    "drawing": {
+      "number": "LPM-7714",
+      "revision": "D",
+      "material_callout": "HLS-4140 Rev C, annealed"
+    },
+    "required_documents": [
+      "mtr",
+      "coc"
+    ]
+  },
+  "documents": {
+    "mtr": "mtr.pdf",
+    "coc": "coc.pdf"
+  },
+  "sha256": {
+    "mtr.pdf": "71ef87c9cb94da682c691410a414829646ea6fb68487668a7d4cb1b2e7d68ee4",
+    "coc.pdf": "9767817cefdef426503232dcc3bf9ee45a3c9c3cdbf033c8c701eb1fee7b3734"
+  },
+  "expected": {
+    "verdict": "INCOMPLETE",
+    "reasons": [
+      "required-statement-missing:mercury-free"
+    ]
+  },
+  "story": "The mercury-contamination statement is absent."
+}

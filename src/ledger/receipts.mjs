@@ -30,6 +30,7 @@ export function decisionReturned(value = {}) {
     ['status', payload.status],
     ['missing_records', payload.missing_records],
     ['items', payload.items],
+    ['provenance', payload.provenance],
   ]);
 }
 
@@ -49,5 +50,23 @@ export function tripwireFired(value = {}) {
     ['tripwire', payload.tripwire ?? payload.tripwire_id],
     ['source', payload.source],
     ['action', payload.action],
+  ]);
+}
+
+export function decisionFailed(value = {}) {
+  const payload = payloadObject(value);
+  return defined([
+    ['decision', payload.decision],
+    ['error', payload.error],
+    ['provenance', payload.provenance],
+  ]);
+}
+
+export function authorizationConsumed(value = {}) {
+  const payload = payloadObject(value);
+  return defined([
+    ['authorization_id', payload.authorization_id],
+    ['effect_id', payload.effect_id],
+    ['payload_sha256', payload.payload_sha256],
   ]);
 }

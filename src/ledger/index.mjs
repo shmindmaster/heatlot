@@ -88,11 +88,22 @@ function ledgerFile(subject, options = {}) {
   return path.join(ledgerRoot(options), policy.ledger.path, `${subject}.jsonl`);
 }
 
-function splitJsonl(raw) {
+/** Split ledger JSONL exactly as the verifier does: one trailing newline is a terminator, any other empty line is a line. */
+export function splitJsonl(raw) {
   if (raw === '') return [];
   const lines = raw.split('\n');
   if (lines[lines.length - 1] === '') lines.pop();
   return lines;
+}
+
+/** Absolute path of a subject's ledger file, from policy.ledger.path. */
+export function ledgerPath(subject, options = {}) {
+  return ledgerFile(subject, options);
+}
+
+/** Absolute path of the ledger directory, from policy.ledger.path. */
+export function ledgerDir(options = {}) {
+  return path.join(ledgerRoot(options), loadPolicy().ledger.path);
 }
 
 export function openLedger(subject, options = {}) {

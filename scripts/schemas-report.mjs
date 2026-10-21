@@ -168,7 +168,7 @@ function printDecision(decision, { provider, strict }) {
 }
 
 function printPreamble({ provider, strict }) {
-  console.log('assay schemas:report — one schema, two runtimes, portable repair');
+  console.log('heatlot schemas:report — one schema, two runtimes, portable repair');
   console.log('Canonical documents: schemas/*.schema.json (draft 2020-12).');
   console.log('Anthropic: strict tool use (grammar-constrained sampling).');
   console.log('OpenAI: structured outputs (strict json_schema response_format).');

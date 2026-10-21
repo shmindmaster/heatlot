@@ -1,0 +1,6 @@
+{
+  "id": "delete-a-mutation",
+  "description": "Coverage 'restored' by deleting the mutation that caught a regression. The suite goes green; the gate notices the guard count fell below its floor.",
+  "delete": "evals/mutations/ledger-skip-chain-check.json",
+  "expected_block": "guard-coverage"
+}

@@ -1,0 +1,46 @@
+{
+  "name": "@heatlot/broker",
+  "version": "0.1.0",
+  "description": "Internal: single-use payload-bound authorizations, untrusted-input refusal, and Ed25519-signed hash-chained receipts. Guards a tool function or proxies an MCP server.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.mjs"
+  },
+  "bin": {
+    "heatlot-broker": "bin/broker.mjs"
+  },
+  "files": [
+    "src/",
+    "bin/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "keywords": [
+    "ai-agents",
+    "agent-safety",
+    "prompt-injection",
+    "authorization",
+    "mcp",
+    "receipts",
+    "ed25519",
+    "audit"
+  ],
+  "author": "Sarosh Hussain",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shmindmaster/heatlot.git",
+    "directory": "packages/broker"
+  },
+  "homepage": "https://github.com/shmindmaster/heatlot/tree/main/packages/broker#readme",
+  "bugs": {
+    "url": "https://github.com/shmindmaster/heatlot/issues"
+  },
+  "private": true
+}

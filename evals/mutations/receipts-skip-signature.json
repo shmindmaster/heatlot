@@ -1,0 +1,11 @@
+{
+  "id": "receipts/skip-signature",
+  "guard": "receipts-signature",
+  "target": "packages/broker/src/receipts.mjs",
+  "patch": {
+    "find": "if (!signed) return fail('signature does not verify');",
+    "replace": "if (false) return fail('signature does not verify');"
+  },
+  "expected_eval": "receipts-forged-rewrite",
+  "catcher_pattern": "a rewritten chain with recomputed hashes fails the signature check"
+}

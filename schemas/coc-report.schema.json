@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://shmindmaster.github.io/assay/schemas/coc-report.schema.json",
+  "$id": "https://shmindmaster.github.io/heatlot/schemas/coc-report.schema.json",
   "title": "Certificate-of-Conformance completeness report",
   "description": "Fail-closed contract wrapping scripts/verify-completeness.mjs output. Structural rules (allOf if/then): (a) status=complete requires verifier.exit_code 0, forbids missing_records, and requires every item on_file===true; (b) status=incomplete requires verifier.exit_code 3 and at least one missing record; (c) any item claimed on_file:true must carry a non-null 64-hex sha256. A fabricated 'present' claim cannot validate.",
   "type": "object",

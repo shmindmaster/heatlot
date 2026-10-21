@@ -13,7 +13,7 @@ import { assemble } from '../src/context/assembler.mjs';
 import { readChain } from '../src/ledger/index.mjs';
 
 function isolated(t) {
-  const ledgerRoot = mkdtempSync(path.join(os.tmpdir(), 'assay-context-'));
+  const ledgerRoot = mkdtempSync(path.join(os.tmpdir(), 'heatlot-context-'));
   t.after(() => rmSync(ledgerRoot, { recursive: true, force: true }));
   return { ledgerRoot };
 }

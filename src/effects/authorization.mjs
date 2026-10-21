@@ -1,8 +1,25 @@
 import { createHash } from 'node:crypto';
-import { append } from '../ledger/index.mjs';
+import { append, readChain } from '../ledger/index.mjs';
 import { verifyCompleteness } from '../../scripts/verify-completeness.mjs';
 
-const usedAuthorizations = new Set();
+// Single use is a fact on the subject's ledger, not a flag in process memory.
+// An in-memory set forgets on restart, so a captured authorization could be
+// replayed against a fresh process; a consumed receipt in the hash chain cannot
+// be forgotten without breaking the chain the broker verifies first.
+function consumedOnLedger(subject, authorizationId) {
+  return readChain(subject).some((receipt) => receipt.kind === 'authorization_consumed'
+    && receipt.payload?.authorization_id === authorizationId);
+}
+
+// An authorization is honoured only if the ledger shows it being minted: the
+// receipt at mint_seq must be the authorization_minted record for this id. A
+// self-consistent object assembled outside mintAuthorization has no such receipt.
+function mintedOnLedger(subject, authorization) {
+  if (!Number.isInteger(authorization.mint_seq) || authorization.mint_seq < 1) return false;
+  const receipt = readChain(subject)[authorization.mint_seq - 1];
+  return receipt?.kind === 'authorization_minted'
+    && receipt.payload?.authorization_id === authorization.authorization_id;
+}
 
 function canonicalValue(value) {
   if (Array.isArray(value)) return value.map(canonicalValue);
@@ -137,8 +154,13 @@ export function mintAuthorization(effect, verdict) {
     return refusal('untrusted-context', verdict, `context_blocks.${untrusted.source}.trust`, 'trusted', 'untrusted');
   }
 
+  // mint_seq is the ledger position the mint receipt will occupy. It makes every
+  // mint distinct (two mints over identical inputs are two authorizations, each
+  // usable once) while staying deterministic: it is a logical counter, not a clock.
+  const mintSeq = readChain(verdict.subject).length + 1;
   const body = {
     type: 'EffectAuthorization',
+    mint_seq: mintSeq,
     effect_id: effect.id,
     subject: verdict.subject,
     rule: verdict.rule,
@@ -150,7 +172,7 @@ export function mintAuthorization(effect, verdict) {
     verdict: verdictSummary(verdict),
   };
   const authorization = Object.freeze({ ...body, authorization_id: sha256(body) });
-  append('authorization_minted', 'effect-authorization', verdict.subject, {
+  const receipt = append('authorization_minted', 'effect-authorization', verdict.subject, {
     authorization_id: authorization.authorization_id,
     effect_id: effect.id,
     payload_sha256: authorization.payload_sha256,
@@ -159,6 +181,9 @@ export function mintAuthorization(effect, verdict) {
     rule: authorization.rule,
     outcome: authorization.outcome,
   });
+  if (receipt.seq !== mintSeq) {
+    throw new Error(`authorization mint raced the ledger: expected seq ${mintSeq}, wrote ${receipt.seq}`);
+  }
   return Object.freeze({ ok: true, authorization });
 }
 
@@ -258,7 +283,13 @@ export function inspectAuthorization(effect, candidate) {
       mismatch: { field: 'authorization_id', expected: actualId, actual: suppliedId ?? null },
     };
   }
-  if (usedAuthorizations.has(candidate.authorization_id)) {
+  if (!mintedOnLedger(candidate.subject, candidate)) {
+    return {
+      rule: 'ledger-mint', verdict: candidate.verdict,
+      mismatch: { field: 'authorization.mint_seq', expected: 'authorization_minted receipt for this id', actual: candidate.mint_seq ?? null },
+    };
+  }
+  if (consumedOnLedger(candidate.subject, candidate.authorization_id)) {
     return {
       rule: 'single-use', verdict: candidate.verdict,
       mismatch: { field: 'authorization.used', expected: false, actual: true },
@@ -267,8 +298,18 @@ export function inspectAuthorization(effect, candidate) {
   return null;
 }
 
+/**
+ * Mark an authorization used by appending an authorization_consumed receipt.
+ * Returns false if the ledger already holds one. Called by the broker after
+ * every other check and before the write, so a write that then fails leaves the
+ * authorization spent: failing closed, never re-usable.
+ */
 export function consumeAuthorization(authorization) {
-  if (usedAuthorizations.has(authorization.authorization_id)) return false;
-  usedAuthorizations.add(authorization.authorization_id);
+  if (consumedOnLedger(authorization.subject, authorization.authorization_id)) return false;
+  append('authorization_consumed', 'effect-broker', authorization.subject, {
+    authorization_id: authorization.authorization_id,
+    effect_id: authorization.effect_id,
+    payload_sha256: authorization.payload_sha256,
+  });
   return true;
 }

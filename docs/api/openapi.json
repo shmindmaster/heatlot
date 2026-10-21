@@ -1,0 +1,1386 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "Heatlot API",
+    "version": "0.4.0",
+    "license": {
+      "name": "Apache-2.0",
+      "identifier": "Apache-2.0"
+    },
+    "description": "Every certificate, checked against the record. Inspect inbound supplier packets (certificate of conformance + mill test report) against the PO and the specification. Every finding is cited to a document line; release needs a single-use authorization bound to the exact decision. Synthetic data only."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:4140",
+      "description": "Local"
+    }
+  ],
+  "tags": [
+    {
+      "name": "packets",
+      "description": "The receiving queue"
+    },
+    {
+      "name": "documents",
+      "description": "Documents as received, and their text layers"
+    },
+    {
+      "name": "inspection",
+      "description": "Cited extraction, rules and verdict"
+    },
+    {
+      "name": "release",
+      "description": "Single-use, decision-bound release"
+    },
+    {
+      "name": "receipts",
+      "description": "Signed, hash-chained audit trail"
+    },
+    {
+      "name": "service",
+      "description": "Health"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "Health": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": [
+              "heatlot"
+            ]
+          },
+          "version": {
+            "type": "string"
+          },
+          "packets": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "version",
+          "packets"
+        ]
+      },
+      "PacketSummary": {
+        "type": "object",
+        "properties": {
+          "packet": {
+            "type": "string",
+            "pattern": "^PKT-\\d{5}R?$",
+            "example": "PKT-24002",
+            "description": "Inbound supplier packet id"
+          },
+          "po": {
+            "type": "string"
+          },
+          "item": {
+            "type": "string"
+          },
+          "supplier": {
+            "type": "string"
+          },
+          "received": {
+            "type": "string"
+          },
+          "resubmits": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^PKT-\\d{5}R?$",
+            "example": "PKT-24002",
+            "description": "Inbound supplier packet id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "received",
+              "quarantined",
+              "awaiting-release",
+              "released"
+            ]
+          },
+          "verdict": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "ACCEPT",
+              "INCOMPLETE",
+              "NONCONFORMING",
+              null
+            ]
+          }
+        },
+        "required": [
+          "packet",
+          "po",
+          "item",
+          "supplier",
+          "received",
+          "resubmits",
+          "status",
+          "verdict"
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "x-extensible-enum": [
+                  "not-found",
+                  "invalid-request",
+                  "unsupported-media-type",
+                  "method-not-allowed",
+                  "refused",
+                  "internal"
+                ],
+                "description": "One of not-found, invalid-request, unsupported-media-type, method-not-allowed, refused, internal; new codes may be added."
+              },
+              "message": {
+                "type": "string"
+              },
+              "rule": {
+                "type": "string",
+                "description": "For a refusal: the broker rule that refused, e.g. already-used"
+              }
+            },
+            "required": [
+              "code",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "TextLine": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer"
+          },
+          "line": {
+            "type": "integer"
+          },
+          "text": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "bbox": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "PDF points, origin bottom-left: [x0, y0, x1, y1]"
+          },
+          "font_pt": {
+            "type": "number"
+          },
+          "hidden": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "page",
+          "line",
+          "text",
+          "sha256",
+          "bbox",
+          "font_pt",
+          "hidden"
+        ]
+      },
+      "Inspection": {
+        "type": "object",
+        "properties": {
+          "packet": {
+            "type": "string",
+            "pattern": "^PKT-\\d{5}R?$",
+            "example": "PKT-24002",
+            "description": "Inbound supplier packet id"
+          },
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "ACCEPT",
+              "INCOMPLETE",
+              "NONCONFORMING"
+            ]
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "draft_verdict": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The model's draft. Recorded, never acted on."
+          },
+          "extraction_provenance": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string"
+              },
+              "note": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "additionalProperties": {}
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Finding"
+            }
+          },
+          "rejected": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Rejection"
+            }
+          },
+          "untrusted": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UntrustedLine"
+            }
+          },
+          "decision": {
+            "$ref": "#/components/schemas/Decision"
+          },
+          "ncr": {
+            "$ref": "#/components/schemas/NonconformanceRecord"
+          }
+        },
+        "required": [
+          "packet",
+          "verdict",
+          "reasons",
+          "draft_verdict",
+          "extraction_provenance",
+          "findings",
+          "rejected",
+          "untrusted",
+          "decision",
+          "ncr"
+        ]
+      },
+      "Finding": {
+        "type": "object",
+        "properties": {
+          "rule": {
+            "type": "string",
+            "example": "required-test-missing:tensile"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pass",
+              "fail",
+              "missing"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "cites": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Citation"
+            }
+          }
+        },
+        "required": [
+          "rule",
+          "status",
+          "reason",
+          "cites"
+        ]
+      },
+      "Citation": {
+        "type": "object",
+        "properties": {
+          "doc": {
+            "type": "string",
+            "enum": [
+              "mtr",
+              "coc"
+            ],
+            "description": "mtr: mill test report; coc: certificate of conformance"
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "line": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "text": {
+            "type": "string",
+            "description": "The cited line, as read from the PDF text layer"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "description": "sha256 of the cited line text"
+          }
+        },
+        "required": [
+          "doc",
+          "page",
+          "line"
+        ]
+      },
+      "Rejection": {
+        "type": "object",
+        "properties": {
+          "document": {
+            "type": "string"
+          },
+          "field": {
+            "type": "string",
+            "example": "mechanical.tensile_ksi"
+          },
+          "value": {},
+          "cite": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "doc": {
+                "type": "string",
+                "enum": [
+                  "mtr",
+                  "coc"
+                ],
+                "description": "mtr: mill test report; coc: certificate of conformance"
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "line": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "text": {
+                "type": "string",
+                "description": "The cited line, as read from the PDF text layer"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$",
+                "description": "sha256 of the cited line text"
+              }
+            }
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "no-citation",
+              "unknown-document",
+              "cited-line-missing",
+              "cited-line-hidden",
+              "value-not-on-cited-line"
+            ]
+          }
+        },
+        "required": [
+          "document",
+          "field",
+          "reason"
+        ]
+      },
+      "UntrustedLine": {
+        "type": "object",
+        "properties": {
+          "doc": {
+            "type": "string",
+            "enum": [
+              "mtr",
+              "coc"
+            ],
+            "description": "mtr: mill test report; coc: certificate of conformance"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "line": {
+            "type": "integer"
+          },
+          "text": {
+            "type": "string"
+          },
+          "why": {
+            "type": "string",
+            "enum": [
+              "hidden-text",
+              "instruction-shaped"
+            ]
+          }
+        },
+        "required": [
+          "doc",
+          "page",
+          "line",
+          "text",
+          "why"
+        ]
+      },
+      "Decision": {
+        "type": "object",
+        "properties": {
+          "packet": {
+            "type": "string",
+            "pattern": "^PKT-\\d{5}R?$",
+            "example": "PKT-24002",
+            "description": "Inbound supplier packet id"
+          },
+          "po": {
+            "type": "string"
+          },
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "ACCEPT",
+              "INCOMPLETE",
+              "NONCONFORMING"
+            ]
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "files": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "spec": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "revision": {
+                "type": "string"
+              },
+              "sha256": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "revision",
+              "sha256"
+            ]
+          },
+          "findings_sha256": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "packet",
+          "po",
+          "verdict",
+          "reasons",
+          "files",
+          "spec",
+          "findings_sha256"
+        ],
+        "description": "The payload a release authorization is bound to"
+      },
+      "NonconformanceRecord": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "packet": {
+            "type": "string",
+            "pattern": "^PKT-\\d{5}R?$",
+            "example": "PKT-24002",
+            "description": "Inbound supplier packet id"
+          },
+          "po": {
+            "type": "string"
+          },
+          "disposition": {
+            "type": "string",
+            "enum": [
+              "quarantine"
+            ]
+          },
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "ACCEPT",
+              "INCOMPLETE",
+              "NONCONFORMING"
+            ]
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Finding"
+            }
+          },
+          "untrusted_lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UntrustedLine"
+            }
+          },
+          "opened_from_receipt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "packet",
+          "po",
+          "disposition",
+          "verdict",
+          "reasons",
+          "untrusted_lines",
+          "opened_from_receipt"
+        ]
+      },
+      "Authorization": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tool": {
+            "type": "string",
+            "enum": [
+              "release-material"
+            ]
+          },
+          "payload_sha256": {
+            "type": "string"
+          },
+          "mint_receipt_sha256": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tool",
+          "payload_sha256",
+          "mint_receipt_sha256"
+        ],
+        "description": "Single use, bound to the exact Decision it was minted for"
+      },
+      "ApproveRequest": {
+        "type": "object",
+        "properties": {
+          "by": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "example": "J. Mendez, receiving inspector"
+          }
+        },
+        "required": [
+          "by"
+        ],
+        "additionalProperties": false
+      },
+      "ReleaseRecord": {
+        "type": "object",
+        "properties": {
+          "packet": {
+            "type": "string",
+            "pattern": "^PKT-\\d{5}R?$",
+            "example": "PKT-24002",
+            "description": "Inbound supplier packet id"
+          },
+          "po": {
+            "type": "string"
+          },
+          "released": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "decision_sha256": {
+            "type": "string"
+          },
+          "authorization_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "packet",
+          "po",
+          "released",
+          "decision_sha256",
+          "authorization_id"
+        ]
+      },
+      "ReleaseRequest": {
+        "type": "object",
+        "properties": {
+          "authorization": {
+            "$ref": "#/components/schemas/Authorization"
+          }
+        },
+        "required": [
+          "authorization"
+        ],
+        "additionalProperties": false
+      },
+      "ReceiptChain": {
+        "type": "object",
+        "properties": {
+          "packet": {
+            "type": "string",
+            "pattern": "^PKT-\\d{5}R?$",
+            "example": "PKT-24002",
+            "description": "Inbound supplier packet id"
+          },
+          "verified": {
+            "type": "boolean"
+          },
+          "broken_at": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "public_key_pem": {
+            "type": "string"
+          },
+          "receipts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Receipt"
+            }
+          }
+        },
+        "required": [
+          "packet",
+          "verified",
+          "broken_at",
+          "reason",
+          "public_key_pem",
+          "receipts"
+        ]
+      },
+      "Receipt": {
+        "type": "object",
+        "properties": {
+          "seq": {
+            "type": "integer"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "payload": {},
+          "payload_sha256": {
+            "type": "string"
+          },
+          "prev_sha256": {
+            "type": "string"
+          },
+          "key_id": {
+            "type": "string"
+          },
+          "receipt_sha256": {
+            "type": "string"
+          },
+          "sig": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "seq",
+          "kind",
+          "payload_sha256",
+          "prev_sha256",
+          "key_id",
+          "receipt_sha256",
+          "sig"
+        ]
+      }
+    },
+    "parameters": {}
+  },
+  "paths": {
+    "/api/health": {
+      "get": {
+        "operationId": "getHealth",
+        "tags": [
+          "service"
+        ],
+        "summary": "Service health and version",
+        "responses": {
+          "200": {
+            "description": "Healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/packets": {
+      "get": {
+        "operationId": "listPackets",
+        "tags": [
+          "packets"
+        ],
+        "summary": "The receiving queue: every packet with its current status",
+        "responses": {
+          "200": {
+            "description": "The queue",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "packets": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PacketSummary"
+                      }
+                    }
+                  },
+                  "required": [
+                    "packets"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/packets/{packet}": {
+      "get": {
+        "operationId": "getPacket",
+        "tags": [
+          "packets"
+        ],
+        "summary": "One packet: its PO line and status",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^PKT-\\d{5}R?$",
+              "example": "PKT-24002",
+              "description": "Inbound supplier packet id"
+            },
+            "required": true,
+            "description": "Inbound supplier packet id",
+            "name": "packet",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The packet",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PacketSummary"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "po_line": {
+                          "type": "object",
+                          "additionalProperties": {}
+                        },
+                        "documents": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "required": [
+                        "po_line",
+                        "documents"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown packet",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/packets/{packet}/documents/{doc}/lines": {
+      "get": {
+        "operationId": "getDocumentLines",
+        "tags": [
+          "documents"
+        ],
+        "summary": "The text layer of one document, as numbered, hashed lines",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^PKT-\\d{5}R?$",
+              "example": "PKT-24002",
+              "description": "Inbound supplier packet id"
+            },
+            "required": true,
+            "description": "Inbound supplier packet id",
+            "name": "packet",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "mtr",
+                "coc"
+              ],
+              "description": "mtr: mill test report; coc: certificate of conformance"
+            },
+            "required": true,
+            "description": "mtr: mill test report; coc: certificate of conformance",
+            "name": "doc",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lines",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "packet": {
+                      "type": "string",
+                      "pattern": "^PKT-\\d{5}R?$",
+                      "example": "PKT-24002",
+                      "description": "Inbound supplier packet id"
+                    },
+                    "doc": {
+                      "type": "string",
+                      "enum": [
+                        "mtr",
+                        "coc"
+                      ],
+                      "description": "mtr: mill test report; coc: certificate of conformance"
+                    },
+                    "lines": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TextLine"
+                      }
+                    }
+                  },
+                  "required": [
+                    "packet",
+                    "doc",
+                    "lines"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown packet",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/packets/{packet}/documents/{doc}/pdf": {
+      "get": {
+        "operationId": "getDocumentPdf",
+        "tags": [
+          "documents"
+        ],
+        "summary": "The document as received (PDF bytes)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^PKT-\\d{5}R?$",
+              "example": "PKT-24002",
+              "description": "Inbound supplier packet id"
+            },
+            "required": true,
+            "description": "Inbound supplier packet id",
+            "name": "packet",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "mtr",
+                "coc"
+              ],
+              "description": "mtr: mill test report; coc: certificate of conformance"
+            },
+            "required": true,
+            "description": "mtr: mill test report; coc: certificate of conformance",
+            "name": "doc",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PDF",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown packet",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/packets/{packet}/inspect": {
+      "post": {
+        "operationId": "inspectPacket",
+        "tags": [
+          "inspection"
+        ],
+        "summary": "Inspect the packet: cited extraction, rules, verdict; quarantine unless ACCEPT",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^PKT-\\d{5}R?$",
+              "example": "PKT-24002",
+              "description": "Inbound supplier packet id"
+            },
+            "required": true,
+            "description": "Inbound supplier packet id",
+            "name": "packet",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The inspection, every finding cited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Inspection"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown packet",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/packets/{packet}/inspection": {
+      "get": {
+        "operationId": "getInspection",
+        "tags": [
+          "inspection"
+        ],
+        "summary": "The last recorded inspection of the packet (no new receipts)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^PKT-\\d{5}R?$",
+              "example": "PKT-24002",
+              "description": "Inbound supplier packet id"
+            },
+            "required": true,
+            "description": "Inbound supplier packet id",
+            "name": "packet",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The stored inspection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Inspection"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown packet",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/packets/{packet}/approve": {
+      "post": {
+        "operationId": "approveRelease",
+        "tags": [
+          "release"
+        ],
+        "summary": "The inspector's approval of the last inspection: a single-use release authorization bound to its decision",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^PKT-\\d{5}R?$",
+              "example": "PKT-24002",
+              "description": "Inbound supplier packet id"
+            },
+            "required": true,
+            "description": "Inbound supplier packet id",
+            "name": "packet",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authorization minted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Authorization"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown packet",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Refused: not inspected, not ACCEPT, already released, or untrusted input fed the decision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "The body must be application/json",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/packets/{packet}/release": {
+      "post": {
+        "operationId": "releasePacket",
+        "tags": [
+          "release"
+        ],
+        "summary": "Release the material. Runs once per authorization.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^PKT-\\d{5}R?$",
+              "example": "PKT-24002",
+              "description": "Inbound supplier packet id"
+            },
+            "required": true,
+            "description": "Inbound supplier packet id",
+            "name": "packet",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReleaseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Released",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReleaseRecord"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown packet",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Refused: not inspected, already used, already released, never minted, the decision changed, or the packet changed after inspection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "The body must be application/json",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/packets/{packet}/receipts": {
+      "get": {
+        "operationId": "getReceipts",
+        "tags": [
+          "receipts"
+        ],
+        "summary": "The packet's signed receipt chain, verified",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^PKT-\\d{5}R?$",
+              "example": "PKT-24002",
+              "description": "Inbound supplier packet id"
+            },
+            "required": true,
+            "description": "Inbound supplier packet id",
+            "name": "packet",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Receipts and verification",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceiptChain"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown packet",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {}
+}

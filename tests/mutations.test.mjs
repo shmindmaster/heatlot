@@ -35,8 +35,8 @@ test('coc schema requires item sha256 rather than merely constraining it when pr
   assert.equal(validate(report), false, 'a present record without sha256 must be rejected');
 });
 
-test('the mutation runner fails when a declared mutation survives', { skip: process.env.ASSAY_MUTATION_CHILD === '1' }, () => {
-  const definitionsDir = mkdtempSync(path.join(os.tmpdir(), 'assay-survivor-'));
+test('the mutation runner fails when a declared mutation survives', { skip: process.env.HEATLOT_MUTATION_CHILD === '1' }, () => {
+  const definitionsDir = mkdtempSync(path.join(os.tmpdir(), 'heatlot-survivor-'));
   const definition = {
     id: 'test/surviving-comment-change',
     guard: 'test-harness',
@@ -54,7 +54,7 @@ test('the mutation runner fails when a declared mutation survives', { skip: proc
     const result = spawnSync(process.execPath, ['scripts/run-mutations.mjs', '--definitions', definitionsDir], {
       cwd: REPO_ROOT,
       encoding: 'utf8',
-      env: { ...process.env, ASSAY_MUTATION_CHILD: '1' },
+      env: { ...process.env, HEATLOT_MUTATION_CHILD: '1' },
     });
     assert.ifError(result.error);
     const output = result.stdout + result.stderr;

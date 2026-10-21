@@ -1,0 +1,817 @@
+{
+  "server": "heatlot",
+  "protocolRevision": "2026-07-28",
+  "cache": {
+    "ttlMs": 3600000,
+    "cacheScope": "public"
+  },
+  "tools": [
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "The numbered lines of a packet document as read from its PDF text layer, each with its sha256, bounding box and a hidden flag for text set too small to see.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "doc": {
+            "enum": [
+              "mtr",
+              "coc"
+            ],
+            "type": "string"
+          },
+          "packet": {
+            "pattern": "^PKT-\\d{5}R?$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "packet",
+          "doc"
+        ],
+        "type": "object"
+      },
+      "name": "documents.lines",
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "doc": {
+            "enum": [
+              "mtr",
+              "coc"
+            ],
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "bbox": {
+                  "items": {
+                    "type": "number"
+                  },
+                  "maxItems": 4,
+                  "minItems": 4,
+                  "type": "array"
+                },
+                "font_pt": {
+                  "type": "number"
+                },
+                "hidden": {
+                  "type": "boolean"
+                },
+                "line": {
+                  "maximum": 9007199254740991,
+                  "minimum": -9007199254740991,
+                  "type": "integer"
+                },
+                "page": {
+                  "maximum": 9007199254740991,
+                  "minimum": -9007199254740991,
+                  "type": "integer"
+                },
+                "sha256": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "page",
+                "line",
+                "text",
+                "sha256",
+                "bbox",
+                "font_pt",
+                "hidden"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "packet": {
+            "pattern": "^PKT-\\d{5}R?$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "packet",
+          "doc",
+          "lines"
+        ],
+        "type": "object"
+      },
+      "title": "Read a document's text layer"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      },
+      "description": "Check a packet (certificate of conformance + mill test report) against its PO and specification. Returns the verdict (ACCEPT, INCOMPLETE, NONCONFORMING) and every finding with the document, page and line it rests on, plus any extracted value that was rejected and any hidden or instruction-shaped text. Appends signed receipts; never releases material.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "packet": {
+            "pattern": "^PKT-\\d{5}R?$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "packet"
+        ],
+        "type": "object"
+      },
+      "name": "packets.inspect",
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "decision": {
+            "additionalProperties": false,
+            "properties": {
+              "files": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "propertyNames": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              "findings_sha256": {
+                "type": "string"
+              },
+              "packet": {
+                "pattern": "^PKT-\\d{5}R?$",
+                "type": "string"
+              },
+              "po": {
+                "type": "string"
+              },
+              "reasons": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "spec": {
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "revision": {
+                    "type": "string"
+                  },
+                  "sha256": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "revision",
+                  "sha256"
+                ],
+                "type": "object"
+              },
+              "verdict": {
+                "enum": [
+                  "ACCEPT",
+                  "INCOMPLETE",
+                  "NONCONFORMING"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "packet",
+              "po",
+              "verdict",
+              "reasons",
+              "files",
+              "spec",
+              "findings_sha256"
+            ],
+            "type": "object"
+          },
+          "draft_verdict": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "extraction_provenance": {
+            "anyOf": [
+              {
+                "additionalProperties": {},
+                "properties": {
+                  "kind": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "kind"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "findings": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "cites": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "doc": {
+                        "enum": [
+                          "mtr",
+                          "coc"
+                        ],
+                        "type": "string"
+                      },
+                      "line": {
+                        "maximum": 9007199254740991,
+                        "minimum": 1,
+                        "type": "integer"
+                      },
+                      "page": {
+                        "maximum": 9007199254740991,
+                        "minimum": 1,
+                        "type": "integer"
+                      },
+                      "sha256": {
+                        "pattern": "^[0-9a-f]{64}$",
+                        "type": "string"
+                      },
+                      "text": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "doc",
+                      "page",
+                      "line"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "rule": {
+                  "type": "string"
+                },
+                "status": {
+                  "enum": [
+                    "pass",
+                    "fail",
+                    "missing"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "rule",
+                "status",
+                "reason",
+                "cites"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "ncr": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "disposition": {
+                    "const": "quarantine",
+                    "type": "string"
+                  },
+                  "id": {
+                    "type": "string"
+                  },
+                  "opened_from_receipt": {
+                    "type": "string"
+                  },
+                  "packet": {
+                    "pattern": "^PKT-\\d{5}R?$",
+                    "type": "string"
+                  },
+                  "po": {
+                    "type": "string"
+                  },
+                  "reasons": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "cites": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "doc": {
+                                "enum": [
+                                  "mtr",
+                                  "coc"
+                                ],
+                                "type": "string"
+                              },
+                              "line": {
+                                "maximum": 9007199254740991,
+                                "minimum": 1,
+                                "type": "integer"
+                              },
+                              "page": {
+                                "maximum": 9007199254740991,
+                                "minimum": 1,
+                                "type": "integer"
+                              },
+                              "sha256": {
+                                "pattern": "^[0-9a-f]{64}$",
+                                "type": "string"
+                              },
+                              "text": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "doc",
+                              "page",
+                              "line"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "reason": {
+                          "type": "string"
+                        },
+                        "rule": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "enum": [
+                            "pass",
+                            "fail",
+                            "missing"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "rule",
+                        "status",
+                        "reason",
+                        "cites"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "untrusted_lines": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "doc": {
+                          "enum": [
+                            "mtr",
+                            "coc"
+                          ],
+                          "type": "string"
+                        },
+                        "line": {
+                          "maximum": 9007199254740991,
+                          "minimum": -9007199254740991,
+                          "type": "integer"
+                        },
+                        "page": {
+                          "maximum": 9007199254740991,
+                          "minimum": -9007199254740991,
+                          "type": "integer"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "why": {
+                          "enum": [
+                            "hidden-text",
+                            "instruction-shaped"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "doc",
+                        "page",
+                        "line",
+                        "text",
+                        "why"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "verdict": {
+                    "enum": [
+                      "ACCEPT",
+                      "INCOMPLETE",
+                      "NONCONFORMING"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "packet",
+                  "po",
+                  "disposition",
+                  "verdict",
+                  "reasons",
+                  "untrusted_lines",
+                  "opened_from_receipt"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "packet": {
+            "pattern": "^PKT-\\d{5}R?$",
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rejected": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "cite": {
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "doc": {
+                          "enum": [
+                            "mtr",
+                            "coc"
+                          ],
+                          "type": "string"
+                        },
+                        "line": {
+                          "maximum": 9007199254740991,
+                          "minimum": 1,
+                          "type": "integer"
+                        },
+                        "page": {
+                          "maximum": 9007199254740991,
+                          "minimum": 1,
+                          "type": "integer"
+                        },
+                        "sha256": {
+                          "pattern": "^[0-9a-f]{64}$",
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "document": {
+                  "type": "string"
+                },
+                "field": {
+                  "type": "string"
+                },
+                "reason": {
+                  "enum": [
+                    "no-citation",
+                    "unknown-document",
+                    "cited-line-missing",
+                    "cited-line-hidden",
+                    "value-not-on-cited-line"
+                  ],
+                  "type": "string"
+                },
+                "value": {}
+              },
+              "required": [
+                "document",
+                "field",
+                "value",
+                "reason"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "untrusted": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "doc": {
+                  "enum": [
+                    "mtr",
+                    "coc"
+                  ],
+                  "type": "string"
+                },
+                "line": {
+                  "maximum": 9007199254740991,
+                  "minimum": -9007199254740991,
+                  "type": "integer"
+                },
+                "page": {
+                  "maximum": 9007199254740991,
+                  "minimum": -9007199254740991,
+                  "type": "integer"
+                },
+                "text": {
+                  "type": "string"
+                },
+                "why": {
+                  "enum": [
+                    "hidden-text",
+                    "instruction-shaped"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "doc",
+                "page",
+                "line",
+                "text",
+                "why"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "verdict": {
+            "enum": [
+              "ACCEPT",
+              "INCOMPLETE",
+              "NONCONFORMING"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "packet",
+          "verdict",
+          "reasons",
+          "draft_verdict",
+          "extraction_provenance",
+          "findings",
+          "rejected",
+          "untrusted",
+          "decision",
+          "ncr"
+        ],
+        "type": "object"
+      },
+      "title": "Inspect a packet and cite why"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Every inbound supplier packet with its PO, supplier and current status (received, quarantined, awaiting-release, released) and verdict.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {},
+        "type": "object"
+      },
+      "name": "packets.list",
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "packets": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "item": {
+                  "type": "string"
+                },
+                "packet": {
+                  "pattern": "^PKT-\\d{5}R?$",
+                  "type": "string"
+                },
+                "po": {
+                  "type": "string"
+                },
+                "received": {
+                  "type": "string"
+                },
+                "resubmits": {
+                  "anyOf": [
+                    {
+                      "pattern": "^PKT-\\d{5}R?$",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "status": {
+                  "enum": [
+                    "received",
+                    "quarantined",
+                    "awaiting-release",
+                    "released"
+                  ],
+                  "type": "string"
+                },
+                "supplier": {
+                  "type": "string"
+                },
+                "verdict": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "ACCEPT",
+                        "INCOMPLETE",
+                        "NONCONFORMING"
+                      ],
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "packet",
+                "po",
+                "item",
+                "supplier",
+                "received",
+                "resubmits",
+                "status",
+                "verdict"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "packets"
+        ],
+        "type": "object"
+      },
+      "title": "List the receiving queue"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Recompute the packet's hash chain and check every Ed25519 signature. Returns the receipts and where the chain breaks, if it does.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "packet": {
+            "pattern": "^PKT-\\d{5}R?$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "packet"
+        ],
+        "type": "object"
+      },
+      "name": "receipts.verify",
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "broken_at": {
+            "anyOf": [
+              {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "packet": {
+            "pattern": "^PKT-\\d{5}R?$",
+            "type": "string"
+          },
+          "public_key_pem": {
+            "type": "string"
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "receipts": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "key_id": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "payload": {},
+                "payload_sha256": {
+                  "type": "string"
+                },
+                "prev_sha256": {
+                  "type": "string"
+                },
+                "receipt_sha256": {
+                  "type": "string"
+                },
+                "seq": {
+                  "maximum": 9007199254740991,
+                  "minimum": -9007199254740991,
+                  "type": "integer"
+                },
+                "sig": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "seq",
+                "kind",
+                "payload",
+                "payload_sha256",
+                "prev_sha256",
+                "key_id",
+                "receipt_sha256",
+                "sig"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "verified": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "packet",
+          "verified",
+          "broken_at",
+          "reason",
+          "public_key_pem",
+          "receipts"
+        ],
+        "type": "object"
+      },
+      "title": "Verify a packet's receipts"
+    }
+  ]
+}

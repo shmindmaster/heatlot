@@ -1,0 +1,10 @@
+{
+  "id": "mint-ignores-untrusted-context",
+  "description": "A plausible 'cleanup' that drops the untrusted-context refusal from mintAuthorization. The injected purchase order can then mint an authorization for an incomplete package.",
+  "target": "src/effects/authorization.mjs",
+  "patch": {
+    "find": "  const untrusted = verdict.context_blocks.find((block) => block.trust === 'untrusted');\n  if (untrusted) {\n    return refusal(",
+    "replace": "  const untrusted = undefined;\n  if (untrusted) {\n    return refusal("
+  },
+  "expected_block": "refusal-correctness"
+}

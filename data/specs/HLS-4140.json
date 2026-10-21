@@ -1,0 +1,74 @@
+{
+  "id": "HLS-4140",
+  "title": "Alloy steel bar, chromium-molybdenum, 4140 type, annealed (synthetic)",
+  "current_revision": "C",
+  "chemistry_wt_pct": {
+    "C": {
+      "min": 0.38,
+      "max": 0.43
+    },
+    "Mn": {
+      "min": 0.75,
+      "max": 1
+    },
+    "P": {
+      "max": 0.035
+    },
+    "S": {
+      "max": 0.04
+    },
+    "Si": {
+      "min": 0.15,
+      "max": 0.35
+    },
+    "Cr": {
+      "min": 0.8,
+      "max": 1.1
+    },
+    "Mo": {
+      "min": 0.15,
+      "max": 0.25
+    }
+  },
+  "mechanical": {
+    "tensile_ksi": {
+      "min": 95
+    },
+    "yield_ksi": {
+      "min": 60
+    },
+    "elongation_pct": {
+      "min": 20
+    },
+    "hardness_hb": {
+      "max": 255
+    }
+  },
+  "required_tests": [
+    "chemistry",
+    "tensile",
+    "hardness"
+  ],
+  "required_statements": [
+    {
+      "id": "heat-traceability",
+      "description": "The certificate identifies the heat number of the material supplied"
+    },
+    {
+      "id": "spec-and-revision",
+      "description": "The certificate names the specification and its revision"
+    },
+    {
+      "id": "domestic-melt",
+      "description": "A statement that the material was melted and manufactured domestically"
+    },
+    {
+      "id": "mercury-free",
+      "description": "A statement that the material is free of mercury contamination"
+    },
+    {
+      "id": "conformance-signature",
+      "description": "A signed statement of conformance with the signatory's name and title"
+    }
+  ]
+}

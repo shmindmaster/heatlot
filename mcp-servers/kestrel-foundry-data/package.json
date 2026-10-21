@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Read-only MCP boundary over the assay synthetic foundry dataset. Stands in for the future AWS warehouse + SharePoint estate in the demo.",
+  "description": "Read-only MCP boundary over the heatlot synthetic foundry dataset. Stands in for the future AWS warehouse + SharePoint estate in the demo.",
   "main": "src/server.mjs",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.17.0",
-    "zod": "^3.25.0"
+    "@modelcontextprotocol/server": "2.3.1",
+    "zod": "^4.6.5"
   },
   "comment": "Dependencies are installed at the plugin root (npm install there); Node resolution walks up from src/server.mjs. KESTREL_DATA_ROOT overrides the default ../../data location."
 }

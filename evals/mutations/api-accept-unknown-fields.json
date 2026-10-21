@@ -1,0 +1,11 @@
+{
+  "id": "api/accept-unknown-fields",
+  "guard": "api-strict-input",
+  "target": "src/api/schemas.mjs",
+  "patch": {
+    "find": "export const ApproveRequest = z.object({ by: z.string().min(1).max(200).openapi({ example: 'J. Mendez, receiving inspector' }) }).strict().openapi('ApproveRequest');",
+    "replace": "export const ApproveRequest = z.object({ by: z.string().min(1).max(200).openapi({ example: 'J. Mendez, receiving inspector' }) }).openapi('ApproveRequest');"
+  },
+  "expected_eval": "api-boundary",
+  "catcher_pattern": "api: invalid input is rejected at the boundary"
+}

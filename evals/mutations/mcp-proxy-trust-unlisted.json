@@ -1,0 +1,11 @@
+{
+  "id": "mcp-proxy/trust-unlisted-tools",
+  "guard": "mcp-proxy-fail-closed",
+  "target": "packages/broker/src/mcp-proxy.mjs",
+  "patch": {
+    "find": "if (readOnly.get(tool) === true) {",
+    "replace": "if (readOnly.get(tool) !== false) {"
+  },
+  "expected_eval": "mcp-proxy-fail-closed",
+  "catcher_pattern": "an unlisted tool is treated as an effect (fail closed)"
+}

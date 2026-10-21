@@ -1,0 +1,38 @@
+{
+  "packet": "PKT-24004",
+  "received": "2026-09-14",
+  "po": {
+    "po": "PO-31931",
+    "line": 1,
+    "buyer": "Larkspur Precision Machining",
+    "supplier": "Brannock Metals Supply",
+    "item": "4140 alloy steel round bar, 2.000 in diameter, annealed",
+    "quantity": "12 ft x 6 bars",
+    "spec": "HLS-4140",
+    "spec_revision": "C",
+    "drawing": {
+      "number": "LPM-7714",
+      "revision": "D",
+      "material_callout": "HLS-4140 Rev C, annealed"
+    },
+    "required_documents": [
+      "mtr",
+      "coc"
+    ]
+  },
+  "documents": {
+    "mtr": "mtr.pdf",
+    "coc": "coc.pdf"
+  },
+  "sha256": {
+    "mtr.pdf": "5fdf0d45651870adb0ce9b3238509a88afe4c326b1e6a1ddaa988ae0a49fda50",
+    "coc.pdf": "fe3c0a1efa0cbd02f48250f673533b66b51ada66412ded81f1712e105736ad4e"
+  },
+  "expected": {
+    "verdict": "NONCONFORMING",
+    "reasons": [
+      "spec-revision-mismatch"
+    ]
+  },
+  "story": "Certified to revision B; the PO calls for revision C."
+}

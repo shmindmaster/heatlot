@@ -2,7 +2,7 @@
 
 ## Our standard
 
-We want participation in Assay to be useful, respectful, and safe. Examples of
+We want participation in Heatlot to be useful, respectful, and safe. Examples of
 welcome behavior include giving specific technical feedback, testing claims,
 crediting others, accepting correction, and making room for people with
 different experience levels and backgrounds.
@@ -19,7 +19,7 @@ may edit or remove content, limit participation, or ban contributors when
 necessary to protect the project and its participants.
 
 This code applies in repository discussions and in public spaces where someone
-is representing Assay.
+is representing Heatlot.
 
 ## Attribution
 

@@ -1,10 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { broker } from '../src/effects/broker.mjs';
+import { broker, mintAndPerform } from '../src/effects/broker.mjs';
 import { createVerdictRecord, mintAuthorization, sha256 } from '../src/effects/authorization.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -49,6 +50,64 @@ test('a valid authorization permits exactly one effect', () => {
     assert.equal(replay.denial.kind, 'effect_denied');
     assert.equal(replay.denial.payload.rule, 'single-use');
     assert.equal(replay.denial.payload.mismatch.field, 'authorization.used');
+  } finally {
+    rmSync(target, { force: true });
+  }
+});
+
+test('single use survives a restart: a fresh process cannot replay a consumed authorization', () => {
+  const target = published('broker-restart-replay.json');
+  rmSync(target, { force: true });
+  const effect = completeEffect('broker-restart-replay.json');
+  const authorization = authorizationFor(effect);
+
+  try {
+    const first = broker.perform(effect, authorization);
+    assert.equal(first.ok, true, JSON.stringify(first));
+    rmSync(target, { force: true });
+
+    // A separate Node process has no shared memory with this one. The only thing
+    // that can tell it the authorization is spent is the ledger.
+    const script = `
+      import { broker } from './src/effects/broker.mjs';
+      const [effect, authorization] = JSON.parse(process.argv[1]);
+      const result = broker.perform(effect, authorization);
+      process.stdout.write(JSON.stringify({ ok: result.ok, rule: result.denial?.payload?.rule ?? null }));
+    `;
+    const child = spawnSync(process.execPath, ['--input-type=module', '-e', script, JSON.stringify([effect, authorization])], {
+      cwd: REPO_ROOT, encoding: 'utf8',
+    });
+    assert.equal(child.status, 0, child.stderr);
+    assert.deepEqual(JSON.parse(child.stdout), { ok: false, rule: 'single-use' });
+    assert.equal(existsSync(target), false, 'the replayed effect must not have written anything');
+  } finally {
+    rmSync(target, { force: true });
+  }
+});
+
+test('two mints over identical inputs are distinct authorizations, each usable once', () => {
+  const effect = completeEffect('broker-two-mints.json');
+  const first = authorizationFor(effect);
+  const second = authorizationFor(effect);
+  assert.notEqual(first.authorization_id, second.authorization_id);
+  assert.equal(second.mint_seq > first.mint_seq, true);
+});
+
+test('an authorization never minted on the ledger is refused', () => {
+  const target = published('broker-never-minted.json');
+  rmSync(target, { force: true });
+  const genuine = completeEffect('broker-never-minted-original.json');
+  const authorization = authorizationFor(genuine);
+  // Rebind the genuine authorization to a different payload and recompute its id.
+  // Every hash is self-consistent; only the ledger knows this object was never minted.
+  const effect = completeEffect('broker-never-minted.json', '{"status":"COMPLETE","forged":true}\n');
+  const forged = rehashAuthorization({ ...authorization, payload_sha256: sha256(effect.payload) });
+
+  try {
+    const result = broker.perform(effect, forged);
+    assert.equal(result.ok, false, JSON.stringify(result));
+    assert.equal(result.denial.payload.rule, 'ledger-mint');
+    assert.equal(existsSync(target), false);
   } finally {
     rmSync(target, { force: true });
   }
@@ -142,6 +201,20 @@ test('authorization tracing to an untrusted context block is refused', () => {
   assert.equal(existsSync(published('broker-untrusted.json')), false);
 });
 
+test('mintAndPerform records the refused mint under its own rule, not a generic one', () => {
+  const effect = completeEffect('broker-mint-and-perform.json');
+  const verdict = createVerdictRecord(effect.payload.subject, {
+    contextBlocks: [{ source: 'retrieved/injected.md', sha256: 'b'.repeat(64), trust: 'untrusted' }],
+  });
+  const { minted, result } = mintAndPerform(effect, verdict);
+  assert.equal(minted.ok, false);
+  assert.equal(result.ok, false);
+  assert.equal(result.denial.payload.rule, minted.refusal.rule);
+  assert.equal(result.denial.payload.rule, 'untrusted-context');
+  assert.notEqual(result.denial.payload.rule, 'authorization-required');
+  assert.equal(existsSync(published('broker-mint-and-perform.json')), false);
+});
+
 test('malformed authorization bindings return a denial instead of throwing', () => {
   const effect = completeEffect('broker-malformed-authorization.json');
   const malformed = structuredClone(authorizationFor(effect));
@@ -164,6 +237,12 @@ test('an invalid ledger subject still returns a recorded denial', () => {
   assert.equal(result.denial.kind, 'effect_denied');
   assert.equal(result.denial.subject, 'unknown-effect');
   assert.equal(result.denial.payload.rule, 'known-effect');
+});
+
+test('a denial for an effect that names its subject lands in that subject chain', () => {
+  const result = broker.perform({ id: 'publish-coc', subject: 'PO-AER-5519', payload: { destination: 'x' } }, null);
+  assert.equal(result.ok, false);
+  assert.equal(result.denial.subject, 'PO-AER-5519');
 });
 
 test('context block hashes must be deterministic sha256 values', () => {

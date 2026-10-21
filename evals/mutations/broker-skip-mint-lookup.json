@@ -1,0 +1,11 @@
+{
+  "id": "broker/skip-mint-lookup",
+  "guard": "broker-ledger-mint",
+  "target": "packages/broker/src/broker.mjs",
+  "patch": {
+    "find": "const mint = chain.find((r) => r.kind === 'authorization_minted' && r.payload.id === authorization.id);",
+    "replace": "const mint = chain.find((r) => r.kind === 'authorization_minted') ?? { payload: { tool, payload_sha256: hashOf(payload) }, receipt_sha256: authorization.mint_receipt_sha256 };"
+  },
+  "expected_eval": "broker-never-minted",
+  "catcher_pattern": "an authorization that was never minted is refused"
+}

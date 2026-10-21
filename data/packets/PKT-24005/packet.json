@@ -1,0 +1,38 @@
+{
+  "packet": "PKT-24005",
+  "received": "2026-09-14",
+  "po": {
+    "po": "PO-31948",
+    "line": 1,
+    "buyer": "Larkspur Precision Machining",
+    "supplier": "Brannock Metals Supply",
+    "item": "4140 alloy steel round bar, 2.000 in diameter, annealed",
+    "quantity": "12 ft x 6 bars",
+    "spec": "HLS-4140",
+    "spec_revision": "C",
+    "drawing": {
+      "number": "LPM-7714",
+      "revision": "D",
+      "material_callout": "HLS-4140 Rev C, annealed"
+    },
+    "required_documents": [
+      "mtr",
+      "coc"
+    ]
+  },
+  "documents": {
+    "mtr": "mtr.pdf",
+    "coc": "coc.pdf"
+  },
+  "sha256": {
+    "mtr.pdf": "fcb738204e0e78496aa643e66a61f496906c40787c827a29bf443e0c28872ce8",
+    "coc.pdf": "9c19243aee2cf70db485aaea5081b7fcb4c77aedc106fdc32969d351db97201c"
+  },
+  "expected": {
+    "verdict": "INCOMPLETE",
+    "reasons": [
+      "heat-traceability-broken"
+    ]
+  },
+  "story": "The certificate of conformance names a different heat than the mill test report."
+}

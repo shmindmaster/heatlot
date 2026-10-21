@@ -18,10 +18,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { assemble } from '../src/context/assembler.mjs';
-import { complete } from '../src/providers/index.mjs';
-import { createVerdictRecord, mintAuthorization } from '../src/effects/authorization.mjs';
-import { perform } from '../src/effects/broker.mjs';
-import { append, verifyChain, readChain } from '../src/ledger/index.mjs';
+import { completeWithProvenance } from '../src/providers/index.mjs';
+import { createVerdictRecord } from '../src/effects/authorization.mjs';
+import { mintAndPerform } from '../src/effects/broker.mjs';
+import { append, ledgerDir, ledgerPath, verifyChain, readChain } from '../src/ledger/index.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SUBJECT = 'PO-AER-5519';
@@ -40,14 +40,14 @@ const line = (k, v) => console.log(`   ${k.padEnd(26)}${v}`);
 function freshLedger() {
   // The chain is the demo's output, so it starts empty every run. Receipts are
   // gitignored and regenerated; nothing here destroys anything a reviewer wrote.
-  rmSync(path.join(REPO_ROOT, 'ledger', `${SUBJECT}.jsonl`), { force: true });
-  mkdirSync(path.join(REPO_ROOT, 'ledger'), { recursive: true });
+  rmSync(ledgerPath(SUBJECT), { force: true });
+  mkdirSync(ledgerDir(), { recursive: true });
 }
 
 async function main() {
   freshLedger();
 
-  console.log(`\nAssay — prompt injection walkthrough   subject ${SUBJECT}`);
+  console.log(`\nHeatlot — prompt injection walkthrough   subject ${SUBJECT}`);
   console.log('Offline: the model response is replayed from a recorded fixture.');
 
   // ── 1. Context ─────────────────────────────────────────────────────────────
@@ -62,19 +62,7 @@ async function main() {
     line('  flagged', block.source);
     for (const fired of block.fired ?? []) line('  tripwire', fired.id ?? fired);
   }
-  append('context_assembled', AGENT, SUBJECT, {
-    blocks: bundle.blocks.length,
-    used_tokens: bundle.used_tokens,
-    untrusted: untrusted.map((b) => b.source),
-    bundle_sha256: bundle.sha256,
-  });
-  for (const block of untrusted) {
-    append('tripwire_fired', 'policy', SUBJECT, {
-      tripwire: 'instruction-shaped-source',
-      source: block.source,
-      action: 'mark-untrusted',
-    });
-  }
+  // assemble() records context_assembled and any tripwire_fired receipts itself.
   console.log('\n   The block is labelled, not stripped. Stripping would hide the');
   console.log('   attempt and leave an agent that looks like it reasoned cleanly.');
 
@@ -82,8 +70,8 @@ async function main() {
   step(2, 'Ask the model — it believes the injected note');
   append('decision_requested', AGENT, SUBJECT, { decision: 'coc-report', prompt_chars: PROMPT.length });
   // Replay named explicitly. The offline claim should not depend on whether the
-  // reader happens to have ASSAY_LIVE set in their shell.
-  const draft = await complete({ decisionId: 'coc-report', prompt: PROMPT, provider: 'replay' });
+  // reader happens to have HEATLOT_LIVE set in their shell.
+  const { value: draft, provenance } = await completeWithProvenance({ decisionId: 'coc-report', prompt: PROMPT, provider: 'replay' });
   const claimed = draft.items.find((i) => i.type === 'mechanical-test');
 
   line('schema', 'coc-report.schema.json — VALID');
@@ -94,6 +82,7 @@ async function main() {
     status: draft.status,
     missing_records: draft.missing_records,
     items: draft.items.length,
+    provenance,
   });
   console.log('\n   Schema-valid and wrong. A schema proves shape, not truth — this is');
   console.log('   exactly the object a stricter schema would still have let through.');
@@ -118,7 +107,9 @@ async function main() {
   // ── 4. Authorization ───────────────────────────────────────────────────────
   step(4, 'Mint an authorization — refused, twice over');
   const payload = { report: draft, destination: 'reports/published/PO-AER-5519.html' };
-  const minted = mintAuthorization({ id: 'publish-coc', payload }, verdict);
+  // One call mints and then attempts the effect with whatever the mint returned, so a
+  // refused mint reaches the broker, and the ledger, under its own rule.
+  const { minted, result } = mintAndPerform({ id: 'publish-coc', payload, subject: SUBJECT }, verdict);
 
   if (minted.ok) {
     console.error('   FAIL: an authorization was minted for an incomplete package.');
@@ -134,7 +125,6 @@ async function main() {
 
   // ── 5. Effect ──────────────────────────────────────────────────────────────
   step(5, 'Attempt the effect anyway — the broker refuses');
-  const result = perform({ id: 'publish-coc', payload, subject: SUBJECT }, minted.authorization ?? null);
   if (result.ok) {
     console.error('   FAIL: the effect was performed without a valid authorization.');
     process.exitCode = 1;

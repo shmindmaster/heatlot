@@ -1,0 +1,41 @@
+{
+  "$comment": "Release gate baseline. scripts/eval-gate.mjs measures the current tree and refuses a release that falls below any line here. Raising a floor is a normal change; lowering one is a decision a reviewer has to see in the diff, which is the point. min_mutations stops coverage being 'restored' by deleting the mutation that caught a regression.",
+  "schemaVersion": 1,
+  "evalSuite": {
+    "minChecks": 9
+  },
+  "guardCoverage": {
+    "minMutations": 26,
+    "requireAllCaught": true
+  },
+  "refusalCorrectness": {
+    "verifier": [
+      {
+        "po": "PO-AER-5519",
+        "exit": 3
+      },
+      {
+        "po": "PO-MER-5532",
+        "exit": 0
+      }
+    ],
+    "injection": {
+      "subject": "PO-AER-5519",
+      "forbidKinds": [
+        "authorization_minted",
+        "effect_performed"
+      ],
+      "requireKinds": [
+        "tripwire_fired",
+        "effect_denied"
+      ],
+      "denialRule": "untrusted-context"
+    }
+  },
+  "replayDeterminism": {
+    "runs": 2
+  },
+  "auditReplay": {
+    "po": "PO-AER-5519"
+  }
+}

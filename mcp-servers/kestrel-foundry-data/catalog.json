@@ -1,0 +1,895 @@
+{
+  "server": "kestrel-foundry-data",
+  "protocolRevision": "2026-07-28",
+  "cache": {
+    "ttlMs": 3600000,
+    "cacheScope": "public"
+  },
+  "tools": [
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Get an audit scope with each evidence area resolved against the document index: present:true/false per area. Absent areas are the gap list.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "audit_id": {
+            "enum": [
+              "AUD-2026-S1"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "audit_id"
+        ],
+        "type": "object"
+      },
+      "name": "get_audit_scope",
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "audit_id": {
+            "type": "string"
+          },
+          "evidence_areas": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "area": {
+                  "type": "string"
+                },
+                "expected_path": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "present": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "area",
+                "expected_path",
+                "present"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "gaps": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "area": {
+                  "type": "string"
+                },
+                "expected_path": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "area",
+                "expected_path"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "title": {
+            "type": "string"
+          },
+          "window": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "audit_id",
+          "title",
+          "window",
+          "evidence_areas",
+          "gaps"
+        ],
+        "type": "object"
+      },
+      "title": "Get an audit scope and its evidence gaps"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Fetch one document body by its indexed path. The sha256 is re-verified against the index before anything is returned; unindexed paths are refused.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "type": "object"
+      },
+      "name": "get_document",
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "sha256",
+          "content"
+        ],
+        "type": "object"
+      },
+      "title": "Read one indexed document (hash-verified)"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Get a heat lot: alloy, chemistry, mechanical results, which certification records are on file, and NCRs referencing it.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "heat_number": {
+            "maximum": 4479,
+            "minimum": 4460,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "heat_number"
+        ],
+        "type": "object"
+      },
+      "name": "get_heat_lot",
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": {},
+        "properties": {
+          "alloy": {
+            "type": "string"
+          },
+          "chemistry": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "propertyNames": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "heat_id": {
+            "type": "string"
+          },
+          "heat_number": {
+            "type": "number"
+          },
+          "linked_ncrs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "mechanical": {
+            "additionalProperties": {},
+            "properties": {},
+            "type": "object"
+          },
+          "records_on_file": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "propertyNames": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "heat_number",
+          "heat_id",
+          "alloy",
+          "chemistry",
+          "mechanical",
+          "records_on_file",
+          "linked_ncrs"
+        ],
+        "type": "object"
+      },
+      "title": "Get a heat lot and its records"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Get one NCR in full, including repeat-offender history: prior NCRs on the same part + defect + cause within 90 days before its date.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "ncr_id": {
+            "pattern": "^NCR-2026-\\d{4}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ncr_id"
+        ],
+        "type": "object"
+      },
+      "name": "get_ncr",
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": {},
+        "properties": {
+          "cause_code": {
+            "type": "string"
+          },
+          "cause_text": {
+            "type": "string"
+          },
+          "cell": {
+            "type": "string"
+          },
+          "cost_impact_usd": {
+            "type": "number"
+          },
+          "customer": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          },
+          "defect_type": {
+            "type": "string"
+          },
+          "disposition": {
+            "type": "string"
+          },
+          "heat_number": {
+            "type": "number"
+          },
+          "narrative": {
+            "type": "string"
+          },
+          "ncr_id": {
+            "type": "string"
+          },
+          "part_name": {
+            "type": "string"
+          },
+          "part_number": {
+            "type": "string"
+          },
+          "repeat_analysis": {
+            "additionalProperties": false,
+            "properties": {
+              "occurrence_count_90d": {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              "prior_occurrences": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "date": {
+                      "type": "string"
+                    },
+                    "disposition": {
+                      "type": "string"
+                    },
+                    "ncr_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "ncr_id",
+                    "date",
+                    "disposition"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "repeat_offender": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "prior_occurrences",
+              "occurrence_count_90d",
+              "repeat_offender"
+            ],
+            "type": "object"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ncr_id",
+          "date",
+          "part_number",
+          "heat_number",
+          "defect_type",
+          "cause_code",
+          "cell",
+          "severity",
+          "disposition",
+          "status",
+          "cost_impact_usd",
+          "part_name",
+          "customer",
+          "cause_text",
+          "narrative",
+          "repeat_analysis"
+        ],
+        "type": "object"
+      },
+      "title": "Get one NCR with repeat history"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Get a purchase order with its cert-of-conformance manifest: every required record, its expected path, and whether it is actually on file. The completeness verdict comes from the index, not from the model.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "po": {
+            "enum": [
+              "PO-AER-5519",
+              "PO-MER-5532"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "po"
+        ],
+        "type": "object"
+      },
+      "name": "get_purchase_order",
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": {},
+        "properties": {
+          "customer": {
+            "type": "string"
+          },
+          "heat": {
+            "type": "number"
+          },
+          "items": {
+            "items": {
+              "additionalProperties": {},
+              "properties": {
+                "expected_path": {
+                  "type": "string"
+                },
+                "on_file": {
+                  "type": "boolean"
+                },
+                "sha256": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "type": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "expected_path",
+                "on_file",
+                "sha256"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "missing_records": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "po": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "complete",
+              "incomplete"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "po",
+          "customer",
+          "heat",
+          "items",
+          "status",
+          "missing_records"
+        ],
+        "type": "object"
+      },
+      "title": "Get the certification status of a purchase order"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Scrap/yield rows by week, cell and cause code (CASTLINE export). Pruned to the requested number of most recent weeks; includes weekly totals.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "weeks": {
+            "maximum": 8,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "name": "get_scrap_records",
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "anchor_date": {
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "additionalProperties": {},
+              "properties": {
+                "cause_code": {
+                  "type": "string"
+                },
+                "cell": {
+                  "type": "string"
+                },
+                "cost_usd": {
+                  "type": "number"
+                },
+                "part_number": {
+                  "type": "string"
+                },
+                "quantity_scrapped": {
+                  "type": "number"
+                },
+                "week_ending": {
+                  "type": "string"
+                },
+                "weight_lbs": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "week_ending",
+                "cell",
+                "cause_code",
+                "part_number",
+                "quantity_scrapped",
+                "weight_lbs",
+                "cost_usd"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "weekly_totals": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "cost_usd": {
+                  "type": "number"
+                },
+                "week_ending": {
+                  "type": "string"
+                },
+                "weight_lbs": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "week_ending",
+                "cost_usd",
+                "weight_lbs"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "weeks": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "anchor_date",
+          "weeks",
+          "weekly_totals",
+          "rows"
+        ],
+        "type": "object"
+      },
+      "title": "Get scrap records"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Resolve a single certification record for a heat lot. Returns found:false with the expected path when the record is not on file — it never invents one.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "heat_number": {
+            "maximum": 4479,
+            "minimum": 4460,
+            "type": "integer"
+          },
+          "record_type": {
+            "enum": [
+              "chemistry-cert",
+              "mechanical-test",
+              "heat-treat-cert",
+              "dimensional-report",
+              "radiographic-report",
+              "penetrant-report"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "heat_number",
+          "record_type"
+        ],
+        "type": "object"
+      },
+      "name": "get_test_record",
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "expected_path": {
+            "type": "string"
+          },
+          "found": {
+            "type": "boolean"
+          },
+          "heat_number": {
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "record_type": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "found",
+          "heat_number",
+          "record_type"
+        ],
+        "type": "object"
+      },
+      "title": "Get one certification record for a heat"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "List customer certificate-of-conformance requirement specifications (required record types per customer).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "customer": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "name": "list_cert_requirements",
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "requirements": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "customer": {
+                  "type": "string"
+                },
+                "req_id": {
+                  "type": "string"
+                },
+                "required_records": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "req_id",
+                "customer",
+                "required_records"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "total": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "requirements"
+        ],
+        "type": "object"
+      },
+      "title": "List customer certification requirements"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "List non-conformance reports (compact fields). Filter by status, defect type, cell, or recency (days before the dataset anchor date).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "cell": {
+            "type": "string"
+          },
+          "defect_type": {
+            "enum": [
+              "porosity",
+              "shrinkage",
+              "sand-inclusion",
+              "misrun-cold-shut",
+              "dimensional",
+              "chemistry"
+            ],
+            "type": "string"
+          },
+          "since_days": {
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "open",
+              "closed"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "name": "list_ncrs",
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "ncrs": {
+            "items": {
+              "additionalProperties": {},
+              "properties": {
+                "cause_code": {
+                  "type": "string"
+                },
+                "cell": {
+                  "type": "string"
+                },
+                "cost_impact_usd": {
+                  "type": "number"
+                },
+                "date": {
+                  "type": "string"
+                },
+                "defect_type": {
+                  "type": "string"
+                },
+                "disposition": {
+                  "type": "string"
+                },
+                "heat_number": {
+                  "type": "number"
+                },
+                "ncr_id": {
+                  "type": "string"
+                },
+                "part_number": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "ncr_id",
+                "date",
+                "part_number",
+                "heat_number",
+                "defect_type",
+                "cause_code",
+                "cell",
+                "severity",
+                "disposition",
+                "status",
+                "cost_impact_usd"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "total": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "ncrs"
+        ],
+        "type": "object"
+      },
+      "title": "List non-conformance reports"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Search the document index by path tokens (AND-matched, case-insensitive). Returns paths + sha256, never content — call get_document for the body.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "limit": {
+            "maximum": 50,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "prefix": {
+            "type": "string"
+          },
+          "query": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "type": "object"
+      },
+      "name": "search_documents",
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "matches": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "sha256": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "path",
+                "sha256"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "total": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "matches"
+        ],
+        "type": "object"
+      },
+      "title": "Search indexed documents"
+    }
+  ]
+}

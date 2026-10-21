@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * run-evals.mjs — deterministic eval harness for the assay plugin.
+ * run-evals.mjs — deterministic eval harness for the heatlot plugin.
  *
  * No models are run here. This harness judges the same ground truth the agents
  * are held to, so the structural guarantees are proven by exit codes, not prose:

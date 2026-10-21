@@ -1,0 +1,37 @@
+{
+  "packet": "PKT-24002R",
+  "received": "2026-09-16",
+  "resubmits": "PKT-24002",
+  "po": {
+    "po": "PO-31902",
+    "line": 1,
+    "buyer": "Larkspur Precision Machining",
+    "supplier": "Brannock Metals Supply",
+    "item": "4140 alloy steel round bar, 2.000 in diameter, annealed",
+    "quantity": "12 ft x 6 bars",
+    "spec": "HLS-4140",
+    "spec_revision": "C",
+    "drawing": {
+      "number": "LPM-7714",
+      "revision": "D",
+      "material_callout": "HLS-4140 Rev C, annealed"
+    },
+    "required_documents": [
+      "mtr",
+      "coc"
+    ]
+  },
+  "documents": {
+    "mtr": "mtr.pdf",
+    "coc": "coc.pdf"
+  },
+  "sha256": {
+    "mtr.pdf": "7f9831119cff1edc4800546187ddbc9223fad7a46e7d60d1e38833f2ecf75151",
+    "coc.pdf": "518b74d42e9715f8aad6a404d89968f9002352495155afeaf729297988db1cc7"
+  },
+  "expected": {
+    "verdict": "ACCEPT",
+    "reasons": []
+  },
+  "story": "The supplier resends the hero packet after the inspector asks: the same heat, now with tensile results and without the hidden note."
+}

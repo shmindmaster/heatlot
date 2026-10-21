@@ -17,10 +17,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { assemble } from '../src/context/assembler.mjs';
-import { complete } from '../src/providers/index.mjs';
-import { createVerdictRecord, mintAuthorization } from '../src/effects/authorization.mjs';
-import { perform } from '../src/effects/broker.mjs';
-import { append, verifyChain, readChain } from '../src/ledger/index.mjs';
+import { completeWithProvenance } from '../src/providers/index.mjs';
+import { createVerdictRecord } from '../src/effects/authorization.mjs';
+import { mintAndPerform } from '../src/effects/broker.mjs';
+import { append, ledgerDir, ledgerPath, verifyChain, readChain } from '../src/ledger/index.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SUBJECT = 'PO-AER-5519';
@@ -40,7 +40,7 @@ function check(label, args, expect = 0) {
 }
 
 async function main() {
-  console.log('\nAssay — the agent drafts, software decides.');
+  console.log('\nHeatlot — the agent drafts, software decides.');
   console.log('Offline: no API key, no network.\n');
 
   console.log(`deterministic checks\n${BAR}`);
@@ -56,30 +56,20 @@ async function main() {
     process.exit(1);
   }
 
-  rmSync(path.join(REPO_ROOT, 'ledger', `${SUBJECT}.jsonl`), { force: true });
-  mkdirSync(path.join(REPO_ROOT, 'ledger'), { recursive: true });
+  rmSync(ledgerPath(SUBJECT), { force: true });
+  mkdirSync(ledgerDir(), { recursive: true });
 
   const bundle = assemble({ agent: AGENT, task: PROMPT, entityRefs: { po: SUBJECT } });
   const untrusted = bundle.blocks.filter((b) => b.trust === 'untrusted');
-  append('context_assembled', AGENT, SUBJECT, {
-    blocks: bundle.blocks.length,
-    used_tokens: bundle.used_tokens,
-    untrusted: untrusted.map((b) => b.source),
-    bundle_sha256: bundle.sha256,
-  });
-  for (const block of untrusted) {
-    append('tripwire_fired', 'policy', SUBJECT, {
-      tripwire: 'instruction-shaped-source', source: block.source, action: 'mark-untrusted',
-    });
-  }
+  // assemble() records context_assembled and any tripwire_fired receipts itself.
 
   append('decision_requested', AGENT, SUBJECT, { decision: 'coc-report', prompt_chars: PROMPT.length });
   // Replay named explicitly rather than relied on as the default: a demo that
-  // could reach the network if ASSAY_LIVE happened to be set in the environment
+  // could reach the network if HEATLOT_LIVE happened to be set in the environment
   // would make the repository's offline claim conditional on the reader's shell.
-  const draft = await complete({ decisionId: 'coc-report', prompt: PROMPT, provider: 'replay' });
+  const { value: draft, provenance } = await completeWithProvenance({ decisionId: 'coc-report', prompt: PROMPT, provider: 'replay' });
   append('decision_returned', AGENT, SUBJECT, {
-    status: draft.status, missing_records: draft.missing_records, items: draft.items.length,
+    status: draft.status, missing_records: draft.missing_records, items: draft.items.length, provenance,
   });
 
   const verdict = createVerdictRecord(SUBJECT, { contextBlocks: bundle.blocks });
@@ -89,8 +79,7 @@ async function main() {
   });
 
   const payload = { report: draft, destination: `reports/published/${SUBJECT}.html` };
-  const minted = mintAuthorization({ id: 'publish-coc', payload }, verdict);
-  const result = perform({ id: 'publish-coc', payload, subject: SUBJECT }, minted.authorization ?? null);
+  const { minted, result } = mintAndPerform({ id: 'publish-coc', payload, subject: SUBJECT }, verdict);
   const chain = verifyChain(SUBJECT);
   const receipts = readChain(SUBJECT);
 

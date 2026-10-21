@@ -4,7 +4,7 @@
  * Covers: adapters derive from one schema and disagree only where documented;
  * OpenAI transform is compliant for every registered decision; repair stops
  * at two retries; missing fixture errors clearly; replay is byte-identical;
- * no code path reaches the network when ASSAY_LIVE is unset.
+ * no code path reaches the network when HEATLOT_LIVE is unset.
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -36,17 +36,17 @@ function jsonHas(node, keyword) {
 }
 
 function withLiveUnset(fn) {
-  const priorLive = process.env.ASSAY_LIVE;
-  const priorProvider = process.env.ASSAY_PROVIDER;
-  delete process.env.ASSAY_LIVE;
-  delete process.env.ASSAY_PROVIDER;
+  const priorLive = process.env.HEATLOT_LIVE;
+  const priorProvider = process.env.HEATLOT_PROVIDER;
+  delete process.env.HEATLOT_LIVE;
+  delete process.env.HEATLOT_PROVIDER;
   return Promise.resolve()
     .then(fn)
     .finally(() => {
-      if (priorLive === undefined) delete process.env.ASSAY_LIVE;
-      else process.env.ASSAY_LIVE = priorLive;
-      if (priorProvider === undefined) delete process.env.ASSAY_PROVIDER;
-      else process.env.ASSAY_PROVIDER = priorProvider;
+      if (priorLive === undefined) delete process.env.HEATLOT_LIVE;
+      else process.env.HEATLOT_LIVE = priorLive;
+      if (priorProvider === undefined) delete process.env.HEATLOT_PROVIDER;
+      else process.env.HEATLOT_PROVIDER = priorProvider;
     });
 }
 
@@ -167,7 +167,7 @@ test('replay is byte-identical across two runs', async () => {
   });
 });
 
-test('no code path reaches the network when ASSAY_LIVE is unset', async () => {
+test('no code path reaches the network when HEATLOT_LIVE is unset', async () => {
   await withLiveUnset(async () => {
     let fetches = 0;
     const original = globalThis.fetch;
@@ -181,7 +181,7 @@ test('no code path reaches the network when ASSAY_LIVE is unset', async () => {
       assert.equal(selectProvider().name, 'replay');
       assert.throws(() => selectProvider('openai'), /live-only/);
       assert.throws(() => selectProvider('anthropic'), /live-only/);
-      assert.throws(() => liveFetch('https://example.invalid'), /ASSAY_LIVE is unset/);
+      assert.throws(() => liveFetch('https://example.invalid'), /HEATLOT_LIVE is unset/);
       assert.equal(fetches, 0);
     } finally {
       globalThis.fetch = original;

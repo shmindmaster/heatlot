@@ -1,59 +1,113 @@
 {
-  "name": "assay",
-  "version": "0.2.0",
-  "private": true,
+  "name": "heatlot",
+  "version": "0.4.0",
+  "description": "Every certificate, checked against the record. AI verification of supplier certificates of conformance and mill test reports at receiving inspection: the AI extracts, deterministic rules decide, every field is cited, and release needs a single-use authorization.",
+  "private": false,
   "type": "module",
-  "description": "The agent drafts. Software decides. A runnable reference implementation of the deterministic control layer for AI agents.",
+  "bin": {
+    "heatlot": "bin/heatlot.mjs"
+  },
+  "exports": {
+    ".": "./src/inspection/inspect.mjs",
+    "./api": "./src/api/app.mjs",
+    "./broker": "./packages/broker/src/index.mjs"
+  },
+  "files": [
+    "bin/",
+    "src/api/",
+    "src/inspection/",
+    "src/documents/",
+    "packages/broker/src/",
+    "packages/broker/README.md",
+    "mcp-servers/heatlot/src/",
+    "data/specs/",
+    "data/packets/",
+    "fixtures/extraction/",
+    "docs/api/openapi.json",
+    "console/",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "author": "Sarosh Hussain",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shmindmaster/assay.git"
+    "url": "git+https://github.com/shmindmaster/heatlot.git"
   },
-  "homepage": "https://github.com/shmindmaster/assay#readme",
+  "homepage": "https://github.com/shmindmaster/heatlot#readme",
   "bugs": {
-    "url": "https://github.com/shmindmaster/assay/issues"
+    "url": "https://github.com/shmindmaster/heatlot/issues"
   },
   "keywords": [
+    "receiving-inspection",
+    "certificate-of-conformance",
+    "mill-test-report",
+    "supplier-quality",
+    "as9100",
     "ai-agents",
-    "agent-safety",
-    "deterministic-control",
-    "evals",
     "mcp",
-    "structured-outputs"
+    "audit-trail"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=22.13"
   },
   "scripts": {
     "generate:data": "node scripts/generate-data.mjs",
-    "render:digest": "node scripts/render-digest.mjs --from-data",
-    "render:atlas": "node scripts/render-atlas.mjs",
+    "generate:packets": "node scripts/generate-packets.mjs",
+    "fixtures:extraction": "node scripts/author-extraction-fixtures.mjs",
+    "heatlot": "node bin/heatlot.mjs",
+    "serve": "node bin/heatlot.mjs serve",
     "verify:coc": "node scripts/verify-completeness.mjs",
     "validate:schemas": "node scripts/validate-schemas.mjs",
     "evals": "node scripts/run-evals.mjs",
     "evals:mutate": "node scripts/run-mutations.mjs",
+    "gate": "node scripts/eval-gate.mjs",
+    "gate:drill": "node scripts/gate-drill.mjs",
     "smoke:mcp": "node scripts/smoke-mcp.mjs",
+    "conformance:mcp": "node scripts/conformance-mcp.mjs",
+    "docs:reference": "node scripts/reference-docs.mjs",
+    "docs:openapi": "node scripts/generate-openapi.mjs",
+    "lint:openapi": "redocly lint docs/api/openapi.json",
     "demo": "node scripts/demo-run.mjs",
     "demo:injection": "node scripts/demo-injection.mjs",
     "demo:denied": "node scripts/demo-denied.mjs",
     "context": "node scripts/context-report.mjs",
     "audit": "node scripts/audit.mjs",
     "audit:tamper": "node scripts/audit.mjs --tamper-check",
+    "explorer": "node scripts/render-explorer.mjs",
     "policy:explain": "node scripts/policy-explain.mjs",
     "schemas:report": "node scripts/schemas-report.mjs",
     "tools:report": "node scripts/tools-report.mjs",
     "verify:all": "node scripts/verify-all.mjs",
+    "verify:live": "node scripts/verify-live.mjs",
     "test": "node --test",
-    "effort:log": "node scripts/effort-log.mjs",
-    "effort": "node scripts/effort-rollup.mjs"
+    "test:browser": "node --test tests-browser/explorer-in-browser.mjs",
+    "smoke:package": "node scripts/smoke-package.mjs",
+    "test:console": "node --test tests-browser/console-in-browser.mjs"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.17.0",
-    "zod": "^4.6.5"
+    "@anthropic-ai/sdk": "^0.134.0",
+    "@hono/node-server": "^2.1.5",
+    "@hono/zod-openapi": "^1.6.3",
+    "@modelcontextprotocol/node": "^2.1.1",
+    "@modelcontextprotocol/server": "^2.3.1",
+    "@scalar/hono-api-reference": "^0.12.12",
+    "hono": "^4.13.13",
+    "pdfjs-dist": "^6.4.299",
+    "zod": "^4.6.6"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@modelcontextprotocol/client": "^2.3.1",
+    "@modelcontextprotocol/conformance": "0.2.0-alpha.12",
+    "@redocly/cli": "^2.64.0",
     "ajv": "^8.17.1",
-    "ajv-formats": "^3.0.1"
+    "ajv-formats": "^3.0.1",
+    "pdf-lib": "^1.17.1",
+    "playwright": "1.64.1"
   }
 }

@@ -5,6 +5,12 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+// The scratch copy leaves out generated receipts; their location is policy.ledger.path, not a literal.
+function ledgerTopDir() {
+  const policy = JSON.parse(readFileSync(path.join(REPO_ROOT, 'policy', 'policy.json'), 'utf8'));
+  return policy.ledger.path.split(/[\\/]/).filter(Boolean)[0];
+}
 const DEFAULT_DEFINITIONS = path.join(REPO_ROOT, 'evals', 'mutations');
 
 function parseArgs(argv) {
@@ -38,9 +44,9 @@ function loadDefinitions(directory) {
 }
 
 function copyRepository(destination) {
-  const excluded = new Set(['.git', '.agentlogs', '.briefs', 'node_modules', 'ledger', 'reports']);
+  const excluded = new Set(['.git', '.agentlogs', '.briefs', '.heatlot', 'node_modules', ledgerTopDir(), 'reports']);
   for (const entry of readdirSync(REPO_ROOT, { withFileTypes: true })) {
-    if (excluded.has(entry.name) || entry.name.startsWith('.assay-mutation-')) continue;
+    if (excluded.has(entry.name) || entry.name.startsWith('.heatlot-')) continue;
     cpSync(path.join(REPO_ROOT, entry.name), path.join(destination, entry.name), {
       recursive: entry.isDirectory(),
     });
@@ -62,12 +68,12 @@ function run(command, args, cwd) {
   const result = spawnSync(command, args, {
     cwd,
     encoding: 'utf8',
-    // ASSAY_LIVE is stripped rather than inherited. A mutation child that could
+    // HEATLOT_LIVE is stripped rather than inherited. A mutation child that could
     // reach a live provider would be non-deterministic and billable, and this
     // harness spawns one per mutation.
     env: (() => {
-      const child = { ...process.env, ASSAY_MUTATION_CHILD: '1' };
-      delete child.ASSAY_LIVE;
+      const child = { ...process.env, HEATLOT_MUTATION_CHILD: '1' };
+      delete child.HEATLOT_LIVE;
       return child;
     })(),
   });
@@ -77,10 +83,15 @@ function run(command, args, cwd) {
 
 function exerciseMutation(root) {
   const evals = run(process.execPath, ['scripts/run-evals.mjs'], root);
+  // The app's tests plus every package's tests: the extracted library is held to the same harness.
   const testFiles = readdirSync(path.join(root, 'tests'))
     .filter((file) => file.endsWith('.test.mjs'))
     .sort()
     .map((file) => `tests/${file}`);
+  for (const pkg of readdirSync(path.join(root, 'packages'), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort()) {
+    const dir = path.join(root, 'packages', pkg, 'test');
+    testFiles.push(...readdirSync(dir).filter((file) => file.endsWith('.test.mjs')).sort().map((file) => `packages/${pkg}/test/${file}`));
+  }
   const tests = run(process.execPath, ['--test', ...testFiles], root);
   return {
     failed: evals.status !== 0 || tests.status !== 0,
@@ -105,7 +116,7 @@ function main() {
 
   let caught = 0;
   for (const definition of definitions) {
-    const scratch = mkdtempSync(path.join(REPO_ROOT, '.assay-mutation-'));
+    const scratch = mkdtempSync(path.join(REPO_ROOT, '.heatlot-mutation-'));
     try {
       copyRepository(scratch);
       applyMutation(scratch, definition);

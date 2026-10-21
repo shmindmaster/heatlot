@@ -1,0 +1,36 @@
+{
+  "packet": "PKT-24007",
+  "received": "2026-09-14",
+  "po": {
+    "po": "PO-31977",
+    "line": 1,
+    "buyer": "Larkspur Precision Machining",
+    "supplier": "Brannock Metals Supply",
+    "item": "4140 alloy steel round bar, 2.000 in diameter, annealed",
+    "quantity": "12 ft x 6 bars",
+    "spec": "HLS-4140",
+    "spec_revision": "C",
+    "drawing": {
+      "number": "LPM-7714",
+      "revision": "D",
+      "material_callout": "HLS-4140 Rev C, annealed"
+    },
+    "required_documents": [
+      "mtr",
+      "coc"
+    ]
+  },
+  "documents": {
+    "mtr": "mtr.pdf",
+    "coc": "coc.pdf"
+  },
+  "sha256": {
+    "mtr.pdf": "03124161af1a4a6b886b088d6d448e1a24d99fc647ac2e671983838edc2df2df",
+    "coc.pdf": "3be181ec437d60b53c4d59b710af297e8505ca3bc5aa60186bd897d601e434ca"
+  },
+  "expected": {
+    "verdict": "ACCEPT",
+    "reasons": []
+  },
+  "story": "A conforming packet whose mill test report is a scanned, skewed copy with a text layer."
+}

@@ -1,0 +1,9 @@
+{
+  "name": "@heatlot/mcp-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Heatlot MCP server: inspect supplier packets and cite why. Tools call the HTTP API in process; no release tool.",
+  "main": "src/server.mjs",
+  "comment": "Dependencies are installed at the repository root; Node resolution walks up from src/server.mjs. HEATLOT_OUT overrides the default .heatlot output directory."
+}

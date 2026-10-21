@@ -1,0 +1,11 @@
+{
+  "id": "broker/skip-untrusted-refusal",
+  "guard": "broker-untrusted-input",
+  "target": "packages/broker/src/broker.mjs",
+  "patch": {
+    "find": "if (tainted.length > 0) {",
+    "replace": "if (false) {"
+  },
+  "expected_eval": "broker-untrusted-input",
+  "catcher_pattern": "untrusted input blocks the mint"
+}

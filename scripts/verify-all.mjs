@@ -19,11 +19,15 @@ const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..
 // invert the whole contract.
 const STEPS = [
   { name: 'generate:data', args: ['run', 'generate:data'], expect: 0, proves: 'dataset reproduces from seed' },
+  { name: 'generate:packets', args: ['run', 'generate:packets'], expect: 0, proves: 'supplier packet PDFs reproduce byte for byte' },
   { name: 'test', args: ['test'], expect: 0, proves: 'unit tests across the deterministic layer' },
   { name: 'validate:schemas', args: ['run', 'validate:schemas'], expect: 0, proves: 'schemas compile; fixtures behave as named' },
   { name: 'evals', args: ['run', 'evals'], expect: 0, proves: 'eval suite including refusal cases' },
   { name: 'evals:mutate', args: ['run', 'evals:mutate'], expect: 0, proves: 'every guard is able to fail' },
   { name: 'smoke:mcp', args: ['run', 'smoke:mcp'], expect: 0, proves: 'MCP handshake and the data facts' },
+  { name: 'heatlot verify PKT-24001', args: ['run', 'heatlot', '--', 'verify', 'data/packets/PKT-24001'], expect: 0, proves: 'a conforming packet is accepted, every finding cited' },
+  { name: 'heatlot verify PKT-24002', args: ['run', 'heatlot', '--', 'verify', 'data/packets/PKT-24002'], expect: 3, proves: 'the hero packet: hidden text changes nothing, tensile missing' },
+  { name: 'heatlot verify PKT-24003', args: ['run', 'heatlot', '--', 'verify', 'data/packets/PKT-24003'], expect: 4, proves: 'out-of-range chemistry is nonconforming' },
   { name: 'verify:coc PO-AER-5519', args: ['run', 'verify:coc', '--', 'PO-AER-5519'], expect: 3, proves: 'the refusal, agent-free' },
   { name: 'verify:coc PO-MER-5532', args: ['run', 'verify:coc', '--', 'PO-MER-5532'], expect: 0, proves: 'the verifier discriminates' },
   { name: 'audit:tamper', args: ['run', 'audit:tamper'], expect: 0, proves: 'a tampered receipt breaks the chain' },
@@ -35,11 +39,11 @@ const STEPS = [
 const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const results = [];
 
-// Children run offline whatever the caller's shell holds. ASSAY_LIVE is opt-in
+// Children run offline whatever the caller's shell holds. HEATLOT_LIVE is opt-in
 // for `npm run verify:live` alone, and inheriting it here would quietly make
 // these steps depend on a network and a key.
 const OFFLINE_ENV = { ...process.env };
-delete OFFLINE_ENV.ASSAY_LIVE;
+delete OFFLINE_ENV.HEATLOT_LIVE;
 
 for (const step of STEPS) {
   const run = spawnSync(npm, step.args, {

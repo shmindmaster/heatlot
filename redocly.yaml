@@ -1,0 +1,8 @@
+# Minimal, stable lint for docs/api/openapi.json: the recommended ruleset against the official
+# OpenAPI 3.1 schema. Only rules that do not apply to a local, unauthenticated service are off.
+extends:
+  - recommended
+rules:
+  security-defined: off          # local service bound to 127.0.0.1; no auth by design (see TECHNICAL.md)
+  info-license-strict: error
+  operation-4xx-response: off    # health and the queue take no input, so no client error is possible

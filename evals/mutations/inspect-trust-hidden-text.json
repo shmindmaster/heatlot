@@ -1,0 +1,11 @@
+{
+  "id": "inspect/trust-hidden-text",
+  "guard": "tripwire-hidden-text",
+  "target": "src/inspection/inspect.mjs",
+  "patch": {
+    "find": "const why = line.hidden ? 'hidden-text' :",
+    "replace": "const why = false ? 'hidden-text' :"
+  },
+  "expected_eval": "hero-hidden-citation",
+  "catcher_pattern": "a value cited to hidden text is rejected, and the hidden line is a tripwire"
+}

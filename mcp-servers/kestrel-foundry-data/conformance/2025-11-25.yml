@@ -1,0 +1,32 @@
+# Expected conformance failures at MCP 2025-11-25 for kestrel-foundry-data.
+# This baseline may only shrink: npm run conformance:mcp fails if an entry is added relative to
+# origin/main, and the conformance tool fails if an entry here starts passing (stale entry).
+# Every entry is a feature the server deliberately does not offer; the wire-schema-valid check in
+# each of these scenarios still passes and is enforced.
+server:
+  - completion-complete:completion-complete # failure: capability not offered (read-only tool server)
+  - elicitation-sep1034-defaults:elicitation-sep1034-general # failure: suite fixture tool (test_*) not part of this server
+  - elicitation-sep1330-enums:elicitation-sep1330-general # failure: suite fixture tool (test_*) not part of this server
+  - logging-set-level:logging-set-level # failure: capability not offered (read-only tool server)
+  - prompts-get-embedded-resource:prompts-get-embedded-resource # failure: capability not offered (read-only tool server)
+  - prompts-get-simple:prompts-get-simple # failure: capability not offered (read-only tool server)
+  - prompts-get-with-args:prompts-get-with-args # failure: capability not offered (read-only tool server)
+  - prompts-get-with-image:prompts-get-with-image # failure: capability not offered (read-only tool server)
+  - prompts-list:prompts-list # failure: capability not offered (read-only tool server)
+  - resources-list:resources-list # failure: capability not offered (read-only tool server)
+  - resources-read-binary:resources-read-binary # failure: capability not offered (read-only tool server)
+  - resources-read-text:resources-read-text # failure: capability not offered (read-only tool server)
+  - resources-subscribe:resources-subscribe # failure: capability not offered (read-only tool server)
+  - resources-templates-read:resources-templates-read # failure: capability not offered (read-only tool server)
+  - resources-unsubscribe:resources-unsubscribe # failure: capability not offered (read-only tool server)
+  - server-sse-multiple-streams:server-sse-multiple-streams-session # warning: the 2025-era HTTP fallback is stateless, so no session ID is issued
+  - tools-call-audio:tools-call-audio # failure: suite fixture tool (test_*) not part of this server
+  - tools-call-elicitation:tools-call-elicitation # failure: suite fixture tool (test_*) not part of this server
+  - tools-call-embedded-resource:tools-call-embedded-resource # failure: suite fixture tool (test_*) not part of this server
+  - tools-call-error:tools-call-error # failure: suite fixture tool (test_*) not part of this server
+  - tools-call-image:tools-call-image # failure: suite fixture tool (test_*) not part of this server
+  - tools-call-mixed-content:tools-call-mixed-content # failure: suite fixture tool (test_*) not part of this server
+  - tools-call-sampling:tools-call-sampling # failure: suite fixture tool (test_*) not part of this server
+  - tools-call-simple-text:tools-call-simple-text # failure: suite fixture tool (test_*) not part of this server
+  - tools-call-with-logging:tools-call-with-logging # failure: capability not offered (read-only tool server)
+  - tools-call-with-progress:tools-call-with-progress # failure: suite fixture tool (test_*) not part of this server

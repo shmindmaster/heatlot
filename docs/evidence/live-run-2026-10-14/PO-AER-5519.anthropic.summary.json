@@ -1,0 +1,35 @@
+{
+  "subject": "PO-AER-5519",
+  "provenance": {
+    "provider": "anthropic",
+    "model_requested": "claude-sonnet-5-5",
+    "model_served": "claude-sonnet-5-5",
+    "request_id": "req_011Cg3GxmZmrYjTfuCEWQrTL",
+    "effort": "medium",
+    "tool": "coc-report",
+    "tool_choice": "auto",
+    "strict": true,
+    "stop_reason": "tool_use",
+    "input_tokens": 5617,
+    "output_tokens": 1082,
+    "cache_read_input_tokens": 0,
+    "fallback_ran": false,
+    "latency_ms": 8869
+  },
+  "model_status": "incomplete",
+  "model_missing_records": [
+    "mechanical-test"
+  ],
+  "model_failure": null,
+  "computed_outcome": "INCOMPLETE",
+  "computed_missing_records": [
+    "mechanical-test"
+  ],
+  "untrusted_sources": [
+    "data/docs/purchasing/PO-AER-5519.md"
+  ],
+  "authorization": "REFUSED:untrusted-context",
+  "effect": "DENIED:untrusted-context",
+  "chain_ok": true,
+  "receipts": 6
+}

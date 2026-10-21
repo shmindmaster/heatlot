@@ -1,6 +1,6 @@
-# Contributing to Assay
+# Contributing to Heatlot
 
-Assay welcomes focused bug reports, adversarial fixtures, mutations, and small
+Heatlot welcomes focused bug reports, adversarial fixtures, mutations, and small
 changes that strengthen its core claim: software owns hard guarantees while the
 model supplies judgment.
 
@@ -12,7 +12,7 @@ synthetic and never commit secrets, customer data, or proprietary prompts.
 
 ## Local verification
 
-Assay requires Node.js 20 or newer.
+Heatlot requires Node.js 20 or newer.
 
 ```bash
 npm ci

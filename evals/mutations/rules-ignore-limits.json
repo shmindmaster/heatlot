@@ -1,0 +1,11 @@
+{
+  "id": "rules/ignore-limits",
+  "guard": "rules-limits",
+  "target": "src/inspection/rules.mjs",
+  "patch": {
+    "find": "  return (min === undefined || value >= min) && (max === undefined || value <= max);",
+    "replace": "  return true;"
+  },
+  "expected_eval": "nonconforming-quarantine",
+  "catcher_pattern": "quarantine opens a nonconformance record with the cited reasons"
+}

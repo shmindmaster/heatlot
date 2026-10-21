@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * generate-data.mjs — synthetic foundry dataset generator for the assay demo.
+ * generate-data.mjs — synthetic foundry dataset generator for the heatlot demo.
  *
  * DETERMINISTIC: seeded PRNG, fixed calendar anchor (2026-08-06), no wall-clock reads.
  * Re-running reproduces every byte. Output:

@@ -10,7 +10,7 @@ body:
     id: invariant
     attributes:
       label: Expected invariant
-      description: What property should Assay have preserved?
+      description: What property should Heatlot have preserved?
     validations:
       required: true
   - type: textarea

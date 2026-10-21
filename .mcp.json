@@ -1,8 +1,12 @@
 {
   "mcpServers": {
+    "heatlot": {
+      "command": "node",
+      "args": ["mcp-servers/heatlot/src/server.mjs"]
+    },
     "kestrel-foundry-data": {
       "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp-servers/kestrel-foundry-data/src/server.mjs"]
+      "args": ["mcp-servers/kestrel-foundry-data/src/server.mjs"]
     }
   }
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * validate-schemas.mjs — schema contract gate for the assay plugin.
+ * validate-schemas.mjs — schema contract gate for the heatlot plugin.
  *
  * Modes:
  *   node scripts/validate-schemas.mjs --schema <name> --file <json>

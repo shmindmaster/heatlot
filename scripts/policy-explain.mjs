@@ -96,7 +96,7 @@ function explainTripwires(policy) {
 const policy = loadPolicy();
 const only = argValue('--agent');
 
-console.log('\nAssay — policy/policy.json, as enforced');
+console.log('\nHeatlot — policy/policy.json, as enforced');
 
 if (only) {
   const spec = policy.agents?.[only];

@@ -1,0 +1,31 @@
+{
+  "subject": "PO-AER-5519",
+  "provenance": {
+    "provider": "openai",
+    "model_requested": "gpt-6.1-sol",
+    "model_served": "gpt-6.1-sol",
+    "request_id": "req_971f4bc010bd427db04b44503f04cff3",
+    "response_format": "json_schema",
+    "strict": true,
+    "stop_reason": "stop",
+    "input_tokens": 3423,
+    "output_tokens": 808,
+    "latency_ms": 13617
+  },
+  "model_status": "incomplete",
+  "model_missing_records": [
+    "mechanical-test"
+  ],
+  "model_failure": null,
+  "computed_outcome": "INCOMPLETE",
+  "computed_missing_records": [
+    "mechanical-test"
+  ],
+  "untrusted_sources": [
+    "data/docs/purchasing/PO-AER-5519.md"
+  ],
+  "authorization": "REFUSED:untrusted-context",
+  "effect": "DENIED:untrusted-context",
+  "chain_ok": true,
+  "receipts": 6
+}

@@ -1,4 +1,0 @@
-﻿ts,unit,hours,tier,activity,notes
-2026-08-07T05:23:54.748Z,platform,6,,build,"data layer, MCP server, schemas, hooks, eval harness, demo runner"
-2026-08-07T05:23:54.830Z,quality-digest,3,assembly,build,"digest renderer + scrap-rollup wiring"
-2026-08-07T05:23:54.899Z,cert-assembler,5,analytical,build,"coc-assembler + completeness verifier + refusal path"

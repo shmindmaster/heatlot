@@ -1,4 +1,4 @@
-# AGENTS.md — Assay
+# AGENTS.md — Heatlot
 
 Instructions for any coding agent working in this repository.
 
@@ -21,7 +21,7 @@ the tests pass.
   `git clone` and `npm install` — obviously needs the network; nothing after it
   does. The default provider replays fixtures, demo scripts name replay
   explicitly rather than relying on the default, and spawned children have
-  `ASSAY_LIVE` stripped. Live calls are opt-in behind `ASSAY_LIVE=1` and belong
+  `HEATLOT_LIVE` stripped. Live calls are opt-in behind `HEATLOT_LIVE=1` and belong
   only to `npm run verify:live`.
 - **Reproducible.** Seeded generators, logical counters, no wall clock in any
   output a test or a reviewer compares. Two runs produce identical bytes.
@@ -37,9 +37,11 @@ the tests pass.
 
 - Dataset changes go through `scripts/generate-data.mjs`, which is seeded and
   reproducible. Never hand-edit anything under `data/`.
-- Changing a subagent's scope means updating, in the same commit: its file in
-  `agents/`, its schema in `schemas/`, its entry in `policy/policy.json`, its
-  eval cases in `evals/cases/`, and `docs/architecture.md`.
+- Changing a decision's scope means updating, in the same commit: its schema in
+  `schemas/`, its entry in `policy/policy.json`, its eval cases in `evals/cases/`,
+  and `docs/architecture.md`.
+- `packages/broker/` is the published library. A change to it keeps its own
+  tests and its mutations in `evals/mutations/` green, and bumps its version.
 - **Adding a guard means adding a mutation.** A new check in the control layer
   is not finished until `evals/mutations/` contains a patch that defeats it and
   the harness proves the suite catches that patch. A guard with no mutation is
@@ -58,7 +60,9 @@ npm run evals:mutate
 npm run smoke:mcp
 npm run validate:schemas
 npm run verify:all
-claude plugin validate .
+npm run gate
+npm run gate:drill
+npm run test:browser   # needs a browser: npx playwright install chromium-headless-shell
 ```
 
 Report what you verified, not what you wrote. If a command fails, fix it or say

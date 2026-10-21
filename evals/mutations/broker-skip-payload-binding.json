@@ -1,0 +1,11 @@
+{
+  "id": "broker/skip-payload-binding",
+  "guard": "broker-payload-binding",
+  "target": "packages/broker/src/broker.mjs",
+  "patch": {
+    "find": "if (mint.payload.payload_sha256 !== hashOf(payload))",
+    "replace": "if (false && mint.payload.payload_sha256 !== hashOf(payload))"
+  },
+  "expected_eval": "broker-payload-changed",
+  "catcher_pattern": "a changed payload is refused"
+}

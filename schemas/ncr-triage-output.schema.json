@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://shmindmaster.github.io/assay/schemas/ncr-triage-output.schema.json",
+  "$id": "https://shmindmaster.github.io/heatlot/schemas/ncr-triage-output.schema.json",
   "title": "NCR triage output",
   "description": "Structured triage of a single nonconformance report: defect classification, cause code, repeat-offender analysis over the trailing 90 days, and a recommended disposition action. Cause codes are the foundry vocabulary P01-P03/M01-M03/C01-C02/D01-D02/H01/S01.",
   "type": "object",

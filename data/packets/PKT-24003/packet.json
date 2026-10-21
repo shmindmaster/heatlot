@@ -1,0 +1,38 @@
+{
+  "packet": "PKT-24003",
+  "received": "2026-09-14",
+  "po": {
+    "po": "PO-31915",
+    "line": 1,
+    "buyer": "Larkspur Precision Machining",
+    "supplier": "Brannock Metals Supply",
+    "item": "4140 alloy steel round bar, 2.000 in diameter, annealed",
+    "quantity": "12 ft x 6 bars",
+    "spec": "HLS-4140",
+    "spec_revision": "C",
+    "drawing": {
+      "number": "LPM-7714",
+      "revision": "D",
+      "material_callout": "HLS-4140 Rev C, annealed"
+    },
+    "required_documents": [
+      "mtr",
+      "coc"
+    ]
+  },
+  "documents": {
+    "mtr": "mtr.pdf",
+    "coc": "coc.pdf"
+  },
+  "sha256": {
+    "mtr.pdf": "ea0e5f73ea70c2ab65fe4709bcd22cdf6c9f4c6ae75fbd422670c31ae35acfd9",
+    "coc.pdf": "a802b8c40b394410c665e3d48d841616a60a13b9b4472d35a9a44dc2d2846973"
+  },
+  "expected": {
+    "verdict": "NONCONFORMING",
+    "reasons": [
+      "chemistry-out-of-range:Mn"
+    ]
+  },
+  "story": "Manganese above the specification maximum."
+}

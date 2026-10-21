@@ -16,156 +16,26 @@ import { toFunctionDefinition } from '../src/providers/openai.mjs';
 import { listToolFixtures } from '../src/providers/replay.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const openPos = JSON.parse(readFileSync(path.join(REPO_ROOT, 'data', 'exports', 'erp', 'open-pos.json'), 'utf8'));
-const auditScope = JSON.parse(readFileSync(path.join(REPO_ROOT, 'data', 'exports', 'quality', 'audit-scope.json'), 'utf8'));
-
-const HEAT_RECORD_TYPES = [
-  'chemistry-cert', 'mechanical-test', 'heat-treat-cert',
-  'dimensional-report', 'radiographic-report', 'penetrant-report',
-];
-const DEFECT_TYPES = ['porosity', 'shrinkage', 'sand-inclusion', 'misrun-cold-shut', 'dimensional', 'chemistry'];
-const PO_ENUM = openPos.purchase_orders.map((p) => p.po);
-
-/**
- * Input contracts mirrored from mcp-servers/kestrel-foundry-data/src/server.mjs
- * registerTool zod schemas. Optional fields stay optional here; the OpenAI
- * transform promotes them to required + nullable.
- */
-const TOOLS = [
-  {
-    name: 'list_ncrs',
-    description: 'List non-conformance reports (compact fields). Filter by status, defect type, cell, or recency (days before the dataset anchor date).',
-    evalCase: 'ncr-0114-repeat-offender',
-    inputSchema: {
-      type: 'object',
-      additionalProperties: false,
-      properties: {
-        status: { type: 'string', enum: ['open', 'closed'] },
-        defect_type: { type: 'string', enum: DEFECT_TYPES },
-        cell: { type: 'string' },
-        since_days: { type: 'integer', exclusiveMinimum: 0 },
-      },
-    },
-  },
-  {
-    name: 'get_ncr',
-    description: 'Get one NCR in full, including repeat-offender history: prior NCRs on the same part + defect + cause within 90 days before its date.',
-    evalCase: 'ncr-0114-repeat-offender',
-    inputSchema: {
-      type: 'object',
-      additionalProperties: false,
-      required: ['ncr_id'],
-      properties: {
-        ncr_id: { type: 'string', pattern: '^NCR-2026-\\d{4}$' },
-      },
-    },
-  },
-  {
-    name: 'get_heat_lot',
-    description: 'Get a heat lot: alloy, chemistry, mechanical results, which certification records are on file, and NCRs referencing it.',
-    evalCase: 'coc-po-aer-5519-refusal',
-    inputSchema: {
-      type: 'object',
-      additionalProperties: false,
-      required: ['heat_number'],
-      properties: {
-        heat_number: { type: 'integer', minimum: 4460, maximum: 4479 },
-      },
-    },
-  },
-  {
-    name: 'get_test_record',
-    description: 'Resolve a single certification record for a heat lot. Returns found:false with the expected path when the record is not on file — it never invents one.',
-    evalCase: 'coc-po-aer-5519-refusal',
-    inputSchema: {
-      type: 'object',
-      additionalProperties: false,
-      required: ['heat_number', 'record_type'],
-      properties: {
-        heat_number: { type: 'integer', minimum: 4460, maximum: 4479 },
-        record_type: { type: 'string', enum: HEAT_RECORD_TYPES },
-      },
-    },
-  },
-  {
-    name: 'search_documents',
-    description: 'Search the document index by path tokens (AND-matched, case-insensitive). Returns paths + sha256, never content — call get_document for the body.',
-    evalCase: 'dataset-truths',
-    inputSchema: {
-      type: 'object',
-      additionalProperties: false,
-      required: ['query'],
-      properties: {
-        query: { type: 'string', minLength: 1 },
-        prefix: { type: 'string' },
-        limit: { type: 'integer', minimum: 1, maximum: 50 },
-      },
-    },
-  },
-  {
-    name: 'get_document',
-    description: 'Fetch one document body by its indexed path. The sha256 is re-verified against the index before anything is returned; unindexed paths are refused.',
-    evalCase: 'ncr-0114-repeat-offender',
-    inputSchema: {
-      type: 'object',
-      additionalProperties: false,
-      required: ['path'],
-      properties: {
-        path: { type: 'string', minLength: 1 },
-      },
-    },
-  },
-  {
-    name: 'list_cert_requirements',
-    description: 'List customer certificate-of-conformance requirement specifications (required record types per customer).',
-    evalCase: 'coc-po-aer-5519-refusal',
-    inputSchema: {
-      type: 'object',
-      additionalProperties: false,
-      properties: {
-        customer: { type: 'string' },
-      },
-    },
-  },
-  {
-    name: 'get_purchase_order',
-    description: 'Get a purchase order with its cert-of-conformance manifest: every required record, its expected path, and whether it is actually on file. The completeness verdict comes from the index, not from the model.',
-    evalCase: 'coc-po-aer-5519-refusal',
-    inputSchema: {
-      type: 'object',
-      additionalProperties: false,
-      required: ['po'],
-      properties: {
-        po: { type: 'string', enum: PO_ENUM },
-      },
-    },
-  },
-  {
-    name: 'get_scrap_records',
-    description: 'Scrap/yield rows by week, cell and cause code (CASTLINE export). Pruned to the requested number of most recent weeks; includes weekly totals.',
-    evalCase: 'scrap-top-mover',
-    inputSchema: {
-      type: 'object',
-      additionalProperties: false,
-      properties: {
-        weeks: { type: 'integer', minimum: 1, maximum: 8 },
-      },
-    },
-  },
-  {
-    name: 'get_audit_scope',
-    description: 'Get an audit scope with each evidence area resolved against the document index: present:true/false per area. Absent areas are the gap list.',
-    evalCase: 'audit-gaps',
-    inputSchema: {
-      type: 'object',
-      additionalProperties: false,
-      required: ['audit_id'],
-      properties: {
-        audit_id: { type: 'string', enum: [auditScope.audit_id] },
-      },
-    },
-  },
-];
+// The tool inventory is the live server's tools/list result, snapshotted by `npm run docs:reference`
+// into catalog.json (CI fails if it drifts from the server). Nothing here restates a schema; the only
+// local fact is which eval case exercises each tool.
+const CATALOG = JSON.parse(readFileSync(path.join(REPO_ROOT, 'mcp-servers', 'kestrel-foundry-data', 'catalog.json'), 'utf8'));
+const EVAL_CASES = {
+  list_ncrs: 'ncr-0114-repeat-offender',
+  get_ncr: 'ncr-0114-repeat-offender',
+  get_heat_lot: 'coc-po-aer-5519-refusal',
+  get_test_record: 'coc-po-aer-5519-refusal',
+  search_documents: 'dataset-truths',
+  get_document: 'ncr-0114-repeat-offender',
+  list_cert_requirements: 'coc-po-aer-5519-refusal',
+  get_purchase_order: 'coc-po-aer-5519-refusal',
+  get_scrap_records: 'scrap-top-mover',
+  get_audit_scope: 'audit-gaps',
+};
+const TOOLS = CATALOG.tools.map((t) => {
+  if (!EVAL_CASES[t.name]) throw new Error(`tool ${t.name} has no eval case in tools-report EVAL_CASES`);
+  return { ...t, evalCase: EVAL_CASES[t.name] };
+});
 
 const NOT_ADDED = [
   {
@@ -252,7 +122,7 @@ function printTool(tool, { provider }) {
 
 function main() {
   const flags = parseArgs(process.argv.slice(2));
-  console.log('assay tools:report — kestrel-foundry-data, 10 read-only tools');
+  console.log(`heatlot tools:report — kestrel-foundry-data, ${TOOLS.length} read-only tools (from catalog.json)`);
   console.log('Token costs are median JSON.stringify(response).length/4 against fixtures/provider.');
   console.log('That is a deterministic estimate, not a vendor tokenizer.');
   if (flags.provider === 'openai') {
@@ -267,7 +137,7 @@ function main() {
   console.log('='.repeat(78));
   console.log('Tools deliberately not added, and why');
   console.log('');
-  console.log('Tool restraint is a design decision. Ten read-only tools is the inventory;');
+  console.log(`Tool restraint is a design decision. ${TOOLS.length} read-only tools is the inventory;`);
   console.log('everything below was considered and rejected.');
   console.log('');
   for (const item of NOT_ADDED) {

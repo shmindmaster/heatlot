@@ -1,13 +1,13 @@
 # Security policy
 
-Assay is a reference implementation, not a hosted service. Security reports are
+Heatlot is a reference implementation, not a hosted service. Security reports are
 still important because people may reuse its policy, authorization, ledger, and
 provider-adapter patterns in systems that do make real changes.
 
 ## Supported version
 
-Security fixes target the current `main` branch. This project has not published
-a stable release line yet.
+Security fixes target the current `main` branch and the latest tagged release
+(currently v0.3.x). The project is pre-1.0, so there is no long-term support line.
 
 ## Report a vulnerability
 

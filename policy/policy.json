@@ -107,6 +107,8 @@
       "decision_returned",
       "verdict",
       "authorization_minted",
+      "authorization_consumed",
+      "decision_failed",
       "effect_performed",
       "effect_denied",
       "tripwire_fired"

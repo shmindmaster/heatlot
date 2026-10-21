@@ -8,7 +8,7 @@
 The default provider is `src/providers/replay.mjs`, which serves recorded
 request and response pairs from `fixtures/provider/`. No documented command
 requires an API key, an account, or a network call. Live provider calls are
-opt-in behind `ASSAY_LIVE=1` and are exercised only by `npm run verify:live`,
+opt-in behind `HEATLOT_LIVE=1` and are exercised only by `npm run verify:live`,
 which is not part of `npm run demo` or `npm test`.
 
 ## 4.2 The constraint that forced it
@@ -44,7 +44,10 @@ testing around it.
 **Dropping the live path entirely.** Rejected. Without it the adapters are
 unfalsifiable — the fixtures would only ever prove they agree with themselves.
 `npm run verify:live` is how a change to an adapter gets checked against the real
-API, deliberately and by choice, rather than on every run.
+API, deliberately and by choice, rather than on every run. It replays the
+injection scenario against the live model and records provenance on every
+decision receipt; one recorded run is kept under `docs/evidence/` so a reader
+without a key can see what a live receipt contains.
 
 ## 4.4 Consequences accepted
 

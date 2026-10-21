@@ -130,7 +130,8 @@ boundary is a boundary, not a sandbox.
 ## 3.4 A draft edited after approval
 
 **Mechanism.** An authorization is bound to the sha256 of the effect payload and
-to the input hashes of the verdict that produced it, and it is single-use. Edit
+to the input hashes of the verdict that produced it, and it is single-use, with
+consumption recorded on the subject's ledger rather than in process memory. Edit
 the draft and the payload hash changes and the token no longer matches. Change a
 source record and the verdict's input hashes no longer match. Replay a spent
 token and it is refused. Each refusal writes a denial receipt naming the exact

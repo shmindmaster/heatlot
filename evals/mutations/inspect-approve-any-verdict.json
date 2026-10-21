@@ -1,0 +1,11 @@
+{
+  "id": "inspect/approve-any-verdict",
+  "guard": "release-accept-only",
+  "target": "src/inspection/inspect.mjs",
+  "patch": {
+    "find": "  if (result.decision.verdict !== 'ACCEPT') {",
+    "replace": "  if (false) {"
+  },
+  "expected_eval": "accept-only-release",
+  "catcher_pattern": "only an ACCEPT can be approved for release"
+}

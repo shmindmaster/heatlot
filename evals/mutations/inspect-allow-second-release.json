@@ -1,0 +1,11 @@
+{
+  "id": "inspect/allow-second-release",
+  "guard": "release-once",
+  "target": "src/inspection/inspect.mjs",
+  "patch": {
+    "find": "  if (alreadyReleased(broker)) {",
+    "replace": "  if (false) {"
+  },
+  "expected_eval": "release-once",
+  "catcher_pattern": "material is released once: a second approval cannot mint a second release"
+}

@@ -16,12 +16,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [20, 22]
+        node: [22, 24]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ matrix.node }}
           cache: npm
@@ -31,3 +31,47 @@ jobs:
       - run: npm run verify:all
       - name: Confirm generated corpus is reproducible
         run: test -z "$(git status --porcelain --untracked-files=all -- data/)"
+      - name: Release gate (evals/gate.json floors)
+        run: npm run gate
+      - name: Confirm the committed benchmark matches the code
+        run: git diff --exit-code -- docs/benchmark.md
+      - name: Gate drill (each deliberate regression must be blocked)
+        run: npm run gate:drill
+      - name: Reference docs and MCP catalog match the server and schemas
+        run: npm run docs:reference -- --check
+      - name: OpenAPI document matches the code
+        run: npm run docs:openapi -- --check
+      - name: OpenAPI lint (Redocly, recommended ruleset)
+        run: npm run lint:openapi
+      - name: No breaking API change against the last released contract (oasdiff)
+        # The published contract is the API document in the latest v* release that has one.
+        # Breaking it needs a major version; main between releases is free to change.
+        run: |
+          git fetch --no-tags --depth=1 origin 'refs/tags/v*:refs/tags/v*' 2>/dev/null || true
+          base=""
+          for tag in $(git tag -l 'v*' --sort=-v:refname); do
+            if git cat-file -e "$tag:docs/api/openapi.json" 2>/dev/null; then base="$tag"; break; fi
+          done
+          if [ -z "$base" ]; then echo "no released API document yet; nothing to compare"; exit 0; fi
+          echo "comparing against $base"
+          git show "$base:docs/api/openapi.json" > "$RUNNER_TEMP/base-openapi.json"
+          docker run --rm -v "$RUNNER_TEMP:/base:ro" -v "$PWD:/head:ro" tufin/oasdiff:v1.33.0 \
+            breaking /base/base-openapi.json /head/docs/api/openapi.json --fail-on ERR
+      - name: API contract fuzzing against the spec (Schemathesis)
+        run: |
+          python3 -m pip install --quiet --user "schemathesis==4.29.1"
+          HEATLOT_OUT="$RUNNER_TEMP/heatlot-out" node bin/heatlot.mjs serve --port 4141 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:4141/api/health >/dev/null && break; sleep 1; done
+          ~/.local/bin/st run docs/api/openapi.json --url http://127.0.0.1:4141 --checks all --max-examples 25
+      - name: The npm package installs and runs on its own
+        run: npm run smoke:package
+      - name: Fetch main for the conformance baseline shrink check
+        run: git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main
+      - name: MCP conformance at 2026-07-28 and 2025-11-25 (baseline may only shrink)
+        run: npm run conformance:mcp
+      - name: Install the browser for the Explorer test
+        run: npx playwright install --with-deps chromium-headless-shell
+      - name: Receipt Explorer in a real browser
+        run: npm run test:browser
+      - name: Inspection console in a real browser (flows, keyboard, axe WCAG 2.2 AA)
+        run: npm run test:console

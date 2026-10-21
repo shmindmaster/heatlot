@@ -1,0 +1,11 @@
+{
+  "id": "statements/count-hidden-lines",
+  "guard": "statements-visible-only",
+  "target": "src/inspection/statements.mjs",
+  "patch": {
+    "find": "const hit = lines.find((l) => !l.hidden && pattern.test(l.text));",
+    "replace": "const hit = lines.find((l) => pattern.test(l.text));"
+  },
+  "expected_eval": "hidden-statement",
+  "catcher_pattern": "a required statement in hidden text does not count"
+}

@@ -1,4 +1,4 @@
-# Evals — assay
+# Evals — heatlot
 
 This directory is the judgment layer. It exists so that every claim the demo
 makes about agent behavior is backed by a process exit code, not by prose.

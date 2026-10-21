@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://shmindmaster.github.io/assay/schemas/digest-input.schema.json",
+  "$id": "https://shmindmaster.github.io/heatlot/schemas/digest-input.schema.json",
   "title": "Weekly quality digest input",
   "description": "Composed input contract for the weekly quality digest rendered by scripts/render-digest.mjs. Aggregates the four subagent domains: NCR posture (open count, new this week, ageing, repeat offenders), scrap cost vs the trailing-4-week average, cert-of-conformance package gaps, and audit evidence readiness. All figures trace to data/exports resolved against data/index.json at the dataset anchor.",
   "type": "object",

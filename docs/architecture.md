@@ -1,6 +1,6 @@
 # 1. Introduction
 
-Assay is a working example of one idea: when an LLM agent is put in front of a
+Heatlot is a working example of one idea: when an LLM agent is put in front of a
 decision that matters, the model should draft and software should decide. The
 model is good at reading a heterogeneous pile of documents and writing a
 coherent account of it. It is not a place to put a guarantee. So every guarantee
@@ -173,7 +173,11 @@ An authorization is:
 
 - bound to the sha256 of the effect payload — edit the draft and it stops matching;
 - bound to the verdict's input hashes — change a source record and it stops matching;
-- single-use — a replay is refused and the refusal is recorded;
+- single-use — consumption is an `authorization_consumed` receipt on the
+  subject's ledger, so a replay is refused even by a freshly started process,
+  and the refusal is recorded;
+- ledger-minted — it carries `mint_seq`, and is honoured only if the receipt at
+  that position is its own `authorization_minted` record;
 - refused outright if any contributing context block was marked `untrusted`.
 
 There is no override flag and no environment variable that bypasses it. That
@@ -271,6 +275,15 @@ ten read-only tools, prunes its outputs, hash-verifies `get_document` against
 `data/index.json`, and refuses unindexed path traversal. There are no write tools
 on the server at all — writing is an effect, and effects go through S5.
 
+The server is built on the MCP TypeScript SDK v2 (`@modelcontextprotocol/server`
+2.3.1, spec revision 2026-07-28) over stdio, with zod 4 as the single schema
+library. Every tool carries `readOnlyHint`, `idempotentHint`, `destructiveHint:
+false` and `openWorldHint: false` annotations and an `outputSchema`; results
+return typed `structuredContent` that the SDK validates before it leaves the
+server. `serveStdio` negotiates the era, so 2025-era clients still connect.
+`npm run smoke:mcp` asserts the negotiated revision, the annotations, and the
+output schemas.
+
 `npm run tools:report` prints each tool with its input schema, its median
 response token cost measured against the fixtures, and the eval case that
 exercises it, then a section on tools deliberately not added and why.
@@ -296,8 +309,26 @@ take on trust.
 
 `src/providers/replay.mjs` is the default and serves recorded request and
 response pairs from `fixtures/provider/`, keyed by a hash of decision id, prompt
-hash and provider name. Live calls require `ASSAY_LIVE=1` and belong only to
+hash and provider name. Live calls require `HEATLOT_LIVE=1` and belong only to
 `npm run verify:live`, which is not part of `npm run demo` or `npm test`.
+
+The live Anthropic adapter (`src/providers/anthropic-live.mjs`) uses the official
+SDK with its transport routed through `liveFetch`, so the one gated function
+remains the only way to the network. It defaults to `claude-sonnet-5-5` with the
+decision offered as a strict tool under `tool_choice: auto` (forced tool choice
+is rejected by that model), `output_config.effort`, opt-in server-side
+fallbacks, and no retries the caller cannot see. `completeWithProvenance()`
+returns the decision with its producer: the replay fixture key, or the
+requested and served model, request id, token usage, latency and stop reason.
+Decision receipts carry that provenance; a failed live call becomes a
+`decision_failed` receipt with the same fields.
+
+The live OpenAI adapter (`src/providers/openai-live.mjs`) follows the same
+contract with strict `json_schema` structured outputs, defaulting to
+`gpt-6.1-sol` (override with `HEATLOT_OPENAI_MODEL`). Its endpoint is fixed to
+`api.openai.com`, so an inherited `OPENAI_BASE_URL` cannot redirect a
+verification run. It records the request id, token usage, latency and finish
+reason, and fails closed on a refusal, an HTTP error, or empty or non-JSON content.
 
 Three reasons, set out in `docs/decisions/0004-replay-by-default-no-api-key.md`:
 a reviewer decides whether to read this in the first minute and a key prompt
@@ -320,3 +351,17 @@ moment.
 | Should authorizations expire on the logical clock as well as being single-use? | Whether long-lived tokens matter under concurrency (§2.5) | Repository owner |
 | What review does a change to a deterministic rule require? | The central risk in `docs/threat-model.md` §4 | Repository owner |
 | Is the token-count approximation in S1 close enough to trust near a budget edge? | Whether a bundle can silently exceed a real model's window | Repository owner |
+
+## Published guidance this follows
+
+Anthropic's and OpenAI's agent guidance converges on the same instruction: get guarantees out
+of the model. The surfaces above implement it as follows; neither vendor endorses this project.
+
+| Guidance | Surface |
+|---|---|
+| Anthropic [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs) and [strict tool use](https://platform.claude.com/docs/en/agents-and-tools/tool-use/strict-tool-use); OpenAI [structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs) and [function calling](https://developers.openai.com/api/docs/guides/function-calling) | S2 typed decisions (`src/providers/`, `schemas/`) |
+| Anthropic [context engineering](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) | S1 context assembler (`src/context/assembler.mjs`) |
+| Claude Code [hooks](https://code.claude.com/docs/en/hooks-guide); OpenAI [Agents SDK guardrails](https://openai.github.io/openai-agents-python/guardrails/) | S3 policy and write hook (`policy/policy.json`, `hooks/publish-gate.mjs`) |
+| Anthropic [writing tools for agents](https://www.anthropic.com/engineering/writing-tools-for-agents) | the read-only MCP server (`mcp-servers/kestrel-foundry-data/`) |
+| Anthropic [agent evals](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents); OpenAI [evals](https://developers.openai.com/api/docs/guides/evals) | S7 evals, mutations and gate (`evals/`) |
+| Anthropic [building effective agents](https://www.anthropic.com/engineering/building-effective-agents); OpenAI [practical guide to building agents](https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf) | the overall shape: model in one lane, code owning effects |

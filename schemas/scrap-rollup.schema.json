@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://shmindmaster.github.io/assay/schemas/scrap-rollup.schema.json",
+  "$id": "https://shmindmaster.github.io/heatlot/schemas/scrap-rollup.schema.json",
   "title": "Weekly scrap cost rollup",
   "description": "Weekly scrap digest rollup derived exclusively from exports/erp/scrap-export.csv: per-week totals, per-cause current week cost against the trailing-4-week average, and the top mover by variance percentage.",
   "type": "object",

@@ -19,7 +19,7 @@ import {
 } from '../src/ledger/index.mjs';
 
 function isolated(t) {
-  const ledgerRoot = mkdtempSync(path.join(os.tmpdir(), 'assay-ledger-'));
+  const ledgerRoot = mkdtempSync(path.join(os.tmpdir(), 'heatlot-ledger-'));
   t.after(() => rmSync(ledgerRoot, { recursive: true, force: true }));
   return { ledgerRoot };
 }

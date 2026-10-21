@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://shmindmaster.github.io/assay/schemas/audit-gap-list.schema.json",
+  "$id": "https://shmindmaster.github.io/heatlot/schemas/audit-gap-list.schema.json",
   "title": "Audit evidence gap list",
   "description": "Evidence-readiness report for an audit scope (e.g. AUD-2026-S1): every evidence area with presence flag, the gaps requiring action with a recommended action and owner role, and present/total counters.",
   "type": "object",

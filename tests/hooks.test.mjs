@@ -8,7 +8,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { readdirSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -44,7 +44,7 @@ test('write under references/ is blocked (exit 2)', () => {
 });
 
 test('absolute Windows path into ground truth is blocked (normalization)', () => {
-  const res = runGate(write('C:\\Repos\\shmindmaster\\assay\\schemas\\coc-report.schema.json'));
+  const res = runGate(write('C:\\Repos\\shmindmaster\\heatlot\\schemas\\coc-report.schema.json'));
   assert.equal(res.status, 2);
   assert.match(res.stderr, /schemas\//);
 });
@@ -88,12 +88,11 @@ test('malformed stdin is blocked (exit 2)', () => {
   assert.match(res.stderr, /malformed/);
 });
 
-test('no agent declaration exposes Bash', () => {
-  const agentsDir = path.join(REPO_ROOT, 'agents');
-  const agentFiles = readdirSync(agentsDir).filter((file) => file.endsWith('.md'));
-
-  for (const file of agentFiles) {
-    const frontmatter = readFileSync(path.join(agentsDir, file), 'utf8').split('---', 3)[1];
-    assert.doesNotMatch(frontmatter, /(?:^|,)\s*Bash\s*(?:,|$)/m, `${file} exposes Bash`);
+test('no agent in the policy is granted Bash or a shell', () => {
+  const policy = JSON.parse(readFileSync(path.join(REPO_ROOT, 'policy', 'policy.json'), 'utf8'));
+  for (const [agent, grant] of Object.entries(policy.agents)) {
+    for (const tool of grant.tools ?? []) {
+      assert.doesNotMatch(String(tool), /^(bash|shell|powershell|exec)$/i, `${agent} is granted ${tool}`);
+    }
   }
 });

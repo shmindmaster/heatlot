@@ -1,0 +1,78 @@
+{
+  "generator": "scripts/generate-packets.mjs",
+  "synthetic": true,
+  "packets": [
+    {
+      "packet": "PKT-24001",
+      "po": "PO-31877",
+      "expected": "ACCEPT",
+      "files": {
+        "mtr.pdf": "345955822d8729757be9ee6cd7a10fa1a5620f97d7b37de6d36076d64bb05373",
+        "coc.pdf": "37226faeb5bc7923ae3c6e947227597f5b59dd38f1583b3f98eadada91ef7e09"
+      }
+    },
+    {
+      "packet": "PKT-24002",
+      "po": "PO-31902",
+      "expected": "INCOMPLETE",
+      "files": {
+        "mtr.pdf": "2d69ecf901d127b387a85ea350516817b8b86de4c97b888ec953f994de6b57d1",
+        "coc.pdf": "e7aa07c8421cdaa361ee8cb7d3638549f4d2ee9faa1c73e62de32ef3f0cbdb29"
+      }
+    },
+    {
+      "packet": "PKT-24002R",
+      "po": "PO-31902",
+      "expected": "ACCEPT",
+      "files": {
+        "mtr.pdf": "7f9831119cff1edc4800546187ddbc9223fad7a46e7d60d1e38833f2ecf75151",
+        "coc.pdf": "518b74d42e9715f8aad6a404d89968f9002352495155afeaf729297988db1cc7"
+      }
+    },
+    {
+      "packet": "PKT-24003",
+      "po": "PO-31915",
+      "expected": "NONCONFORMING",
+      "files": {
+        "mtr.pdf": "ea0e5f73ea70c2ab65fe4709bcd22cdf6c9f4c6ae75fbd422670c31ae35acfd9",
+        "coc.pdf": "a802b8c40b394410c665e3d48d841616a60a13b9b4472d35a9a44dc2d2846973"
+      }
+    },
+    {
+      "packet": "PKT-24004",
+      "po": "PO-31931",
+      "expected": "NONCONFORMING",
+      "files": {
+        "mtr.pdf": "5fdf0d45651870adb0ce9b3238509a88afe4c326b1e6a1ddaa988ae0a49fda50",
+        "coc.pdf": "fe3c0a1efa0cbd02f48250f673533b66b51ada66412ded81f1712e105736ad4e"
+      }
+    },
+    {
+      "packet": "PKT-24005",
+      "po": "PO-31948",
+      "expected": "INCOMPLETE",
+      "files": {
+        "mtr.pdf": "fcb738204e0e78496aa643e66a61f496906c40787c827a29bf443e0c28872ce8",
+        "coc.pdf": "9c19243aee2cf70db485aaea5081b7fcb4c77aedc106fdc32969d351db97201c"
+      }
+    },
+    {
+      "packet": "PKT-24006",
+      "po": "PO-31960",
+      "expected": "INCOMPLETE",
+      "files": {
+        "mtr.pdf": "71ef87c9cb94da682c691410a414829646ea6fb68487668a7d4cb1b2e7d68ee4",
+        "coc.pdf": "9767817cefdef426503232dcc3bf9ee45a3c9c3cdbf033c8c701eb1fee7b3734"
+      }
+    },
+    {
+      "packet": "PKT-24007",
+      "po": "PO-31977",
+      "expected": "ACCEPT",
+      "files": {
+        "mtr.pdf": "03124161af1a4a6b886b088d6d448e1a24d99fc647ac2e671983838edc2df2df",
+        "coc.pdf": "3be181ec437d60b53c4d59b710af297e8505ca3bc5aa60186bd897d601e434ca"
+      }
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Governance
 
-Assay is currently a maintainer-led project. Sarosh Hussain (`@shmindmaster`) is
+Heatlot is currently a maintainer-led project. Sarosh Hussain (`@shmindmaster`) is
 the founding maintainer and final decision-maker for releases, security fixes,
 policy changes, and repository access.
 

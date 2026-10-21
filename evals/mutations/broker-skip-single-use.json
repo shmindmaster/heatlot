@@ -1,0 +1,11 @@
+{
+  "id": "broker/skip-single-use",
+  "guard": "broker-single-use",
+  "target": "packages/broker/src/broker.mjs",
+  "patch": {
+    "find": "if (chain.some((r) => r.kind === 'authorization_consumed'",
+    "replace": "if (false && chain.some((r) => r.kind === 'authorization_consumed'"
+  },
+  "expected_eval": "broker-replay-after-restart",
+  "catcher_pattern": "a used authorization cannot be replayed, even after a restart"
+}

@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Heatlot · Receiving inspection</title>
+  <link rel="icon" href="/console/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/console/styles.css">
+  <script type="module" src="/console/app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#verdict-panel">Skip to the verdict</a>
+
+  <header class="bar">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+        <path d="M6 5h14l6 6v16H6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M20 5v6h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M11 19.5l3.2 3.2L21 15.8" class="mark-check" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="wordmark">Heatlot</span>
+      <span class="divider" aria-hidden="true"></span>
+      <span class="context">Receiving inspection</span>
+    </div>
+    <p class="tagline">Every certificate, checked against the record.</p>
+    <div class="bar-end">
+      <span class="site">Larkspur Precision Machining <span class="synthetic">synthetic data</span></span>
+      <button type="button" class="icon-btn" id="help-open" aria-haspopup="dialog" aria-keyshortcuts="?" title="Keyboard shortcuts (?)">
+        <span aria-hidden="true">?</span><span class="sr-only">Keyboard shortcuts</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="shell">
+    <aside class="queue" aria-labelledby="queue-h">
+      <div class="pane-head">
+        <h2 id="queue-h">Receiving queue</h2>
+        <span class="count" id="queue-count" aria-live="polite"></span>
+      </div>
+      <div class="filters" role="group" aria-label="Filter by status" id="filters"></div>
+      <div class="queue-body">
+        <ul class="queue-list" id="queue-list" role="listbox" aria-labelledby="queue-h" tabindex="0" aria-keyshortcuts="j k ArrowDown ArrowUp Enter"></ul>
+        <div class="queue-state" id="queue-state" role="status"></div>
+      </div>
+      <p class="queue-hint"><kbd>j</kbd> <kbd>k</kbd> move · <kbd>Enter</kbd> open · <kbd>?</kbd> shortcuts</p>
+    </aside>
+
+    <main class="viewer" id="viewer" aria-labelledby="viewer-h">
+      <div class="viewer-head">
+        <div class="packet-title">
+          <h1 id="viewer-h">No packet open</h1>
+          <p class="packet-meta" id="packet-meta"></p>
+        </div>
+        <div class="viewer-tools">
+          <div class="tabs" role="tablist" aria-label="Documents" id="doc-tabs">
+            <button type="button" role="tab" id="tab-mtr" data-doc="mtr" aria-controls="doc-well" aria-selected="true" aria-keyshortcuts="1">
+              <span class="tab-abbr">MTR</span><span class="tab-name">Mill test report</span><span class="tab-flag" hidden></span>
+            </button>
+            <button type="button" role="tab" id="tab-coc" data-doc="coc" aria-controls="doc-well" aria-selected="false" tabindex="-1" aria-keyshortcuts="2">
+              <span class="tab-abbr">CoC</span><span class="tab-name">Certificate of conformance</span><span class="tab-flag" hidden></span>
+            </button>
+          </div>
+          <button type="button" class="ghost-btn" id="fit-toggle" aria-pressed="false" aria-keyshortcuts="w" title="Fit width (w)">Fit width</button>
+        </div>
+      </div>
+      <div class="doc-well" id="doc-well" role="tabpanel" aria-labelledby="tab-mtr" tabindex="0">
+        <div class="doc-pages" id="doc-pages"></div>
+        <div class="doc-state" id="doc-state" role="status"></div>
+      </div>
+    </main>
+
+    <section class="verdict-panel" id="verdict-panel" aria-labelledby="verdict-h" tabindex="-1">
+      <div class="pane-head">
+        <h2 id="verdict-h">Verdict</h2>
+        <button type="button" class="ghost-btn" id="receipts-open" aria-haspopup="dialog" aria-controls="receipts" aria-keyshortcuts="r" disabled>
+          Receipts <span class="pill-count" id="receipts-count"></span>
+        </button>
+      </div>
+      <div class="panel-scroll" id="panel-scroll"></div>
+      <div class="actions" id="actions" hidden></div>
+
+      <div class="drawer" id="receipts" role="dialog" aria-modal="false" aria-labelledby="receipts-h" hidden>
+        <div class="drawer-head">
+          <h2 id="receipts-h" tabindex="-1">Receipt chain</h2>
+          <button type="button" class="icon-btn" id="receipts-close" aria-keyshortcuts="Escape" title="Close (Esc)">
+            <span aria-hidden="true">×</span><span class="sr-only">Close receipts</span>
+          </button>
+        </div>
+        <div class="drawer-body" id="receipts-body" tabindex="0" role="region" aria-label="Receipts"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="sr-only" aria-live="polite" id="announce-polite"></div>
+  <div class="sr-only" aria-live="assertive" id="announce-assertive"></div>
+
+  <dialog class="help" id="help" aria-labelledby="help-h">
+    <div class="help-head">
+      <h2 id="help-h">Keyboard shortcuts</h2>
+      <button type="button" class="icon-btn" id="help-close" title="Close (Esc)"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+    </div>
+    <dl class="keys">
+      <div><dt><kbd>j</kbd> <kbd>↓</kbd></dt><dd>Next packet in the queue</dd></div>
+      <div><dt><kbd>k</kbd> <kbd>↑</kbd></dt><dd>Previous packet</dd></div>
+      <div><dt><kbd>Enter</kbd></dt><dd>Open the highlighted packet</dd></div>
+      <div><dt><kbd>f</kbd></dt><dd>Cycle the status filter</dd></div>
+      <div><dt><kbd>i</kbd></dt><dd>Inspect the open packet</dd></div>
+      <div><dt><kbd>1</kbd> <kbd>2</kbd></dt><dd>Show the MTR or the CoC</dd></div>
+      <div><dt><kbd>w</kbd></dt><dd>Toggle fit page / fit width</dd></div>
+      <div><dt><kbd>u</kbd></dt><dd>Show the next untrusted line</dd></div>
+      <div><dt><kbd>a</kbd></dt><dd>Go to approval</dd></div>
+      <div><dt><kbd>r</kbd></dt><dd>Open or close the receipt chain</dd></div>
+      <div><dt><kbd>?</kbd></dt><dd>This list</dd></div>
+      <div><dt><kbd>Esc</kbd></dt><dd>Close a drawer or dialog</dd></div>
+    </dl>
+    <p class="help-note">Release has no shortcut on purpose: it moves material, so it takes a deliberate click or Enter on the button.</p>
+  </dialog>
+</body>
+</html>

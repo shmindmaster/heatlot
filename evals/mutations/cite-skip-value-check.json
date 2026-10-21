@@ -1,0 +1,11 @@
+{
+  "id": "cite/skip-value-check",
+  "guard": "citation-value-on-line",
+  "target": "src/inspection/cite.mjs",
+  "patch": {
+    "find": "if (!lineSays(target.text, field.value)) return",
+    "replace": "if (false && !lineSays(target.text, field.value)) return"
+  },
+  "expected_eval": "value-not-on-line",
+  "catcher_pattern": "a value that is not on its cited line is rejected"
+}

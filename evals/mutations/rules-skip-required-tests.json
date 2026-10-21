@@ -1,0 +1,11 @@
+{
+  "id": "rules/skip-required-tests",
+  "guard": "rules-required-tests",
+  "target": "src/inspection/rules.mjs",
+  "patch": {
+    "find": "const absent = fields.length === 0 || fields.some((f) => f === null || f === undefined);",
+    "replace": "const absent = false;"
+  },
+  "expected_eval": "packet-verdicts",
+  "catcher_pattern": "every packet gets its expected verdict and reasons"
+}

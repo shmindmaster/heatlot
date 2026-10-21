@@ -1,0 +1,11 @@
+{
+  "id": "inspect/skip-file-recheck",
+  "guard": "release-files-unchanged",
+  "target": "src/inspection/inspect.mjs",
+  "patch": {
+    "find": "      if (sha256(readFileSync(path.join(result.packet_dir, name))) !== result.decision.files[doc]) {",
+    "replace": "      if (false) {"
+  },
+  "expected_eval": "packet-changed",
+  "catcher_pattern": "a packet changed after inspection cannot be released"
+}

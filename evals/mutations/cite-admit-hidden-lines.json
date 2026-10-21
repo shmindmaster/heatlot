@@ -1,0 +1,11 @@
+{
+  "id": "cite/admit-hidden-lines",
+  "guard": "citation-visible-only",
+  "target": "src/inspection/cite.mjs",
+  "patch": {
+    "find": "  if (target.hidden) return { ok: false, reason: 'cited-line-hidden', line: target };\n",
+    "replace": ""
+  },
+  "expected_eval": "hero-hidden-citation",
+  "catcher_pattern": "a value cited to hidden text is rejected, and the hidden line is a tripwire"
+}

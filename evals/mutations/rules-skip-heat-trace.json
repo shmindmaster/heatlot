@@ -1,0 +1,11 @@
+{
+  "id": "rules/skip-heat-traceability",
+  "guard": "rules-heat-traceability",
+  "target": "src/inspection/rules.mjs",
+  "patch": {
+    "find": "} else if (mtr.heat_number.value !== coc.heat_number.value) {",
+    "replace": "} else if (false) {"
+  },
+  "expected_eval": "packet-verdicts",
+  "catcher_pattern": "every packet gets its expected verdict and reasons"
+}

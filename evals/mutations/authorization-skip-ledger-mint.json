@@ -1,0 +1,11 @@
+{
+  "id": "authorization/skip-ledger-mint-check",
+  "guard": "authorization-ledger-mint",
+  "target": "src/effects/authorization.mjs",
+  "patch": {
+    "find": "  if (!mintedOnLedger(candidate.subject, candidate)) {",
+    "replace": "  if (false && !mintedOnLedger(candidate.subject, candidate)) {"
+  },
+  "expected_eval": "authorization-ledger-mint",
+  "catcher_pattern": "an authorization never minted on the ledger is refused"
+}

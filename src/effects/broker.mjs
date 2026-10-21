@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { append, verifyChain } from '../ledger/index.mjs';
-import { consumeAuthorization, inspectAuthorization } from './authorization.mjs';
+import { consumeAuthorization, inspectAuthorization, mintAuthorization } from './authorization.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const POLICY_PATH = path.join(REPO_ROOT, 'policy', 'policy.json');
@@ -34,6 +34,7 @@ function subjectOf(effect, authorization) {
   const candidate = authorization?.subject
     ?? authorization?.refusal?.verdict?.subject
     ?? effect?.payload?.subject
+    ?? effect?.subject
     ?? 'unknown-effect';
   return typeof candidate === 'string' && /^[A-Za-z0-9._-]+$/.test(candidate)
     ? candidate
@@ -160,4 +161,16 @@ export function perform(effect, authorization) {
   return { ok: true, receipt };
 }
 
-export const broker = Object.freeze({ perform });
+/**
+ * Mint from a verdict, then attempt the effect with whatever the mint returned.
+ * A refused mint is handed to the broker as the refusal itself, so the denial
+ * receipt names the rule that refused (untrusted-context, say) rather than a
+ * generic "no authorization supplied" that reads like a caller's mistake.
+ */
+export function mintAndPerform(effect, verdict) {
+  const minted = mintAuthorization({ id: effect.id, payload: effect.payload }, verdict);
+  const result = perform(effect, minted.ok ? minted.authorization : minted);
+  return { minted, result };
+}
+
+export const broker = Object.freeze({ perform, mintAndPerform });
