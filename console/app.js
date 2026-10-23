@@ -230,7 +230,7 @@ function renderTabs() {
     const flagged = r?.untrusted.filter((u) => u.doc === doc).length ?? 0;
     const flag = tab.querySelector('.tab-flag');
     flag.hidden = !flagged;
-    tab.setAttribute('aria-label', `${DOC_NAME[doc]}${flagged ? `, ${flagged} untrusted line${flagged === 1 ? '' : 's'}` : ''}`);
+    flag.firstElementChild.textContent = flagged ? `(${flagged} untrusted line${flagged === 1 ? '' : 's'})` : '';
   }
   $('#doc-well').setAttribute('aria-labelledby', `tab-${state.doc}`);
   $('#fit-toggle').setAttribute('aria-pressed', String(state.fit === 'width'));
@@ -431,7 +431,7 @@ function citeButton(c, { untrusted = false, owner = null } = {}) {
   const pressed = state.focused && citeKey(state.focused) === citeKey(c);
   return h('button', {
     type: 'button', class: `cite${untrusted ? ' untrusted' : ''}`, 'aria-pressed': String(Boolean(pressed)),
-    'aria-label': `Show ${DOC_NAME[c.doc]} page ${c.page} line ${c.line}`, dataset: { cite: citeKey(c) },
+    title: `Show ${DOC_NAME[c.doc]} page ${c.page} line ${c.line}`, dataset: { cite: citeKey(c) },
     onclick: (e) => { e.stopPropagation(); focusLine(c, owner === null ? {} : { select: owner }); },
   }, citeLabel(c));
 }
@@ -784,9 +784,11 @@ $('#receipts-close').addEventListener('click', () => closeReceipts());
 $('#fit-toggle').addEventListener('click', toggleFit);
 for (const doc of ['mtr', 'coc']) $(`#tab-${doc}`).addEventListener('click', () => setDoc(doc));
 $('#doc-tabs').addEventListener('keydown', (e) => {
-  if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+  const other = state.doc === 'mtr' ? 'coc' : 'mtr';
+  const next = { ArrowLeft: other, ArrowRight: other, Home: 'mtr', End: 'coc' }[e.key];
+  if (!next) return;
   e.preventDefault();
-  setDoc(state.doc === 'mtr' ? 'coc' : 'mtr', { focusTab: true });
+  setDoc(next, { focusTab: true });
 });
 $('#queue-list').addEventListener('focus', () => { if (!state.cursor) { state.cursor = visible()[0]?.packet ?? null; renderQueue(); } });
 new ResizeObserver(() => $('#viewer').classList.toggle('wide', $('#viewer').clientWidth > 760)).observe($('#viewer'));

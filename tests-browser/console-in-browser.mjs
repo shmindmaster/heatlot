@@ -131,6 +131,10 @@ test('PKT-24002 inspects INCOMPLETE; the hidden 1 pt line is boxed on the MTR pa
   assert.equal(server.status, 409);
   assert.equal(server.body.error.rule, 'verdict-not-accept');
 
+  // Label in Name (WCAG 2.5.3): each accessible name starts with the text a sighted user sees.
+  assert.match(await page.locator('#doc-tabs').ariaSnapshot(), /tab "MTR Mill test report \(1 untrusted line\)" \[selected\][\s\S]*tab "CoC Certificate of conformance"/);
+  assert.ok(await page.getByRole('button', { name: 'MTR p1 · l19', exact: true }).count() > 0);
+
   await page.locator('#opt-PKT-24002 .status.quarantined').waitFor();
   await shot('01-pkt-24002-incomplete-hidden-line.png');
   await axe('PKT-24002 inspected');
@@ -217,6 +221,20 @@ test('dark mode passes the same accessibility checks', async () => {
   await page.locator('.box.hidden-line').waitFor();
   await axe('dark, PKT-24002 inspected');
   await page.emulateMedia({ colorScheme: 'light' });
+});
+
+test('a narrow viewer shows only the abbreviation but keeps the full tab name; Home and End move between tabs', async () => {
+  await page.setViewportSize({ width: 1100, height: 900 });
+  await page.locator('#viewer:not(.wide)').waitFor();
+  assert.ok((await page.locator('#tab-mtr .tab-name').boundingBox()).width <= 1, 'the full name is visually hidden');
+  assert.match(await page.locator('#doc-tabs').ariaSnapshot(), /tab "MTR Mill test report \(1 untrusted line\)"[\s\S]*tab "CoC Certificate of conformance"/);
+  await axe('narrow viewer, PKT-24002 inspected');
+  await page.locator('#tab-mtr').focus();
+  await page.keyboard.press('End');
+  await page.locator('#tab-coc[aria-selected="true"]:focus').waitFor();
+  await page.keyboard.press('Home');
+  await page.locator('#tab-mtr[aria-selected="true"]:focus').waitFor();
+  await page.setViewportSize({ width: 1440, height: 900 });
 });
 
 test('no script errors and no request ever left the server origin', () => {
