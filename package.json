@@ -90,15 +90,15 @@
     "test:console": "node --test tests-browser/console-in-browser.mjs"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.134.0",
+    "@anthropic-ai/sdk": "^0.135.0",
     "@hono/node-server": "^2.1.5",
     "@hono/zod-openapi": "^1.6.3",
     "@modelcontextprotocol/node": "^2.1.1",
     "@modelcontextprotocol/server": "^2.3.1",
-    "@scalar/hono-api-reference": "^0.12.12",
+    "@scalar/hono-api-reference": "^0.12.13",
     "hono": "^4.13.13",
     "pdfjs-dist": "^6.4.299",
-    "zod": "^4.6.6"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
