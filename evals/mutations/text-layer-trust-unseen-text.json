@@ -1,0 +1,11 @@
+{
+  "id": "text-layer/trust-unseen-text",
+  "guard": "hidden-beyond-type-size",
+  "target": "src/documents/text-layer.mjs",
+  "patch": {
+    "find": "hidden: row.size < HIDDEN_FONT_PT || covered,",
+    "replace": "hidden: row.size < HIDDEN_FONT_PT,"
+  },
+  "expected_eval": "text-layer-unseen",
+  "catcher_pattern": "text a reader cannot see is hidden at any size: white on white, and covered over"
+}

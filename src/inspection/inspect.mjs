@@ -13,6 +13,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { findInstructionPhrases } from 'subtext-scan';
 
 import { HeatlotRefusal as BrokerRefusal, Broker, generateKeys, hashOf, trusted, untrusted } from '../../packages/broker/src/index.mjs';
 import { textLines } from '../documents/text-layer.mjs';
@@ -30,6 +31,7 @@ export { BrokerRefusal };
 
 /** Text aimed at a reviewer rather than describing material. Flagged even when visible. */
 const INSTRUCTION_SHAPED = /\b(ignore|disregard)\b.*\b(instructions?|missing|test|requirements?)\b|\b(treat|mark) (this|the) (certificate|package|packet)\b.*\b(complete|conforming|approved?)\b|\bapprove (the )?release\b|\b(automated|ai) reviewer\b/i;
+const instructionShaped = (text) => INSTRUCTION_SHAPED.test(text) || findInstructionPhrases(text).length > 0;
 
 const sha256 = (buf) => createHash('sha256').update(buf).digest('hex');
 
@@ -84,7 +86,7 @@ export async function inspect(packetDir, { provider = 'replay', out = DEFAULT_OU
   for (const [doc, f] of Object.entries(files)) {
     docs[doc] = await textLines(f.bytes);
     for (const line of docs[doc]) {
-      const why = line.hidden ? 'hidden-text' : INSTRUCTION_SHAPED.test(line.text) ? 'instruction-shaped' : null;
+      const why = line.hidden ? 'hidden-text' : instructionShaped(line.text) ? 'instruction-shaped' : null;
       if (!why) continue;
       untrustedLines.push({ doc, ...line, why });
       ledger.append('tripwire_fired', { doc, page: line.page, line: line.line, line_sha256: line.sha256, font_pt: line.font_pt, reason: why });
