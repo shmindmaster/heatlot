@@ -21,7 +21,10 @@ text is copied.
 
 `src/documents/text-layer.mjs` reads a PDF into numbered lines with `pdfjs-dist`: page, line,
 text, sha256 of the text, bounding box and font size. These lines are what every citation points
-at. A line set below 3 pt is flagged `hidden`.
+at. A line set below 3 pt is flagged `hidden`, and so is a line that
+[subtext-scan](https://github.com/shmindmaster/subtext-scan) finds a reader cannot see for another
+reason: colour against what is behind it, painted over, clipped, invisible render mode,
+transparent, or in a layer that is off.
 
 ## Consequences
 

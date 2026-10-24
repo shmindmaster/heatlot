@@ -19,7 +19,8 @@ model is wrong.
   required tests, chemistry and mechanical limits, specification revision against the PO, heat
   traceability from PO to CoC to mill heat, and required statements. NONCONFORMING outranks
   INCOMPLETE, which outranks ACCEPT. Every finding carries its citations.
-- Hidden lines (under 3 pt) and instruction-shaped lines are tripwires: recorded as receipts and
+- Hidden lines (under 3 pt, or unseeable by colour, cover, clip, render mode, opacity or layer) and
+  instruction-shaped lines are tripwires: recorded as receipts and
   passed to the broker as untrusted inputs, so a release approval that they fed is refused.
 - `src/inspection/inspect.mjs` writes a signed receipt at each step through `packages/broker`.
   Anything but ACCEPT quarantines the material and writes a nonconformance record. Release needs

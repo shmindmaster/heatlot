@@ -53,10 +53,12 @@ code.
   properties in range, every required test present, the specification revision matching the
   PO, heat traceability from PO to certificate to lot, and the required statements present.
 - **The verdict is ACCEPT, INCOMPLETE or NONCONFORMING**, and every reason cites its line.
-- **Hidden text in a supplier PDF is left out of the evidence.** Text set too small to read, and
-  text worded like an instruction to a reviewer, is flagged as untrusted and the attempt is
-  written to the record. A release that depended on it is refused. Limits below says how
-  hidden text is detected and where that stops.
+- **Hidden text in a supplier PDF is left out of the evidence.** Text a reader cannot see (set
+  too small, white on white, painted over, clipped away, invisible, or in a layer that is
+  switched off), and text worded like an instruction to a reviewer, is flagged as untrusted and
+  the attempt is written to the record. A release that depended on it is refused. Detection
+  comes from [subtext-scan](https://github.com/shmindmaster/subtext-scan), extracted from this
+  repository. Limits below says where it stops.
 - **Release needs a single-use authorization** bound to the exact decision. Anything other than
   ACCEPT quarantines the material and opens a nonconformance record.
 - **Every step leaves an Ed25519-signed, hash-chained receipt.** An auditor can verify the whole
@@ -226,11 +228,14 @@ nothing to enforce it.
 - **Extraction is replayed, not live.** The model drafts in the bundled packets are authored
   fixtures, labelled as such, so everything runs offline. Live model extraction is planned.
   Whatever a model returns is checked against the same citation rules.
-- **Hidden text is detected by type size and wording.** A line set below 3 points is flagged as
-  hidden, and a line worded like an instruction to a reviewer is flagged untrusted. Other ways of
-  hiding text, such as white type at normal size or text placed off the page, are not detected
-  by colour or position. The citation check still requires every value to sit on a cited line
-  that says it.
+- **Hidden text is detected from the page's drawing instructions, not from a rendering.** A line
+  is flagged hidden when it is set below 3 points, or when
+  [subtext-scan](https://github.com/shmindmaster/subtext-scan) finds it unseeable by colour
+  against what is behind it, cover, clip, render mode, opacity or layer. A line worded like an
+  instruction to a model or reviewer is flagged untrusted. Text over a photograph, text inside
+  images, and tampered font maps are not detected. pdf.js already leaves text placed wholly off
+  the page out of the text layer. The citation check still requires every value to sit on a
+  cited line that says it.
 - **No external anchor.** Receipts are signed, so rewriting them needs the private key, but
   whoever holds that key can still rewrite history. A transparency log or remote witness would
   close this; neither exists here yet.
@@ -246,7 +251,7 @@ nothing to enforce it.
 | Command | Proves |
 |---|---|
 | `npm test` | Unit tests for the inspection flow, the control layer and `packages/broker` |
-| `npm run evals:mutate` | Every guard can fail: 26/26 mutations caught |
+| `npm run evals:mutate` | Every guard can fail: 27/27 mutations caught |
 | `npm run verify:all` | Everything deterministic, at the expected exit codes |
 | `npm run gate` / `gate:drill` | The release gate holds its floors and blocks each deliberate regression |
 | `npm run docs:openapi -- --check` / `lint:openapi` | The committed OpenAPI 3.1 document is generated from the code, and passes Redocly |
