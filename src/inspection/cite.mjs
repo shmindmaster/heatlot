@@ -2,8 +2,8 @@
  * The citation check: a value is admitted only if the line it cites says it.
  *
  * For every `{ value, cite }` the check requires that the cited document, page and line exist,
- * that the line is visible (hidden text is never evidence), and that the value appears in the
- * line's text (numbers compared as numbers, strings as whole tokens). An admitted value keeps the
+ * that the cited document is the one the field was extracted for, that the line is visible (hidden
+ * text is never evidence), and that the value appears in the line's text (numbers compared as numbers, strings as whole tokens). An admitted value keeps the
  * cited line's sha256, so a later edit to the document breaks the citation.
  *
  * Rejected values are dropped from the evidence and reported with the reason. The rules then see
@@ -20,10 +20,14 @@ function lineSays(text, value) {
   return new RegExp(`(^|[\\s:,(])${escaped}($|[\\s,.;)])`).test(text);
 }
 
-/** Check one cited value against the documents' lines. */
-export function checkCitation(docs, field) {
+/**
+ * Check one cited value against the documents' lines. When `docName` is given, the citation must
+ * point into that same document: a field extracted for the CoC cannot be supported by an MTR line.
+ */
+export function checkCitation(docs, field, docName) {
   if (!field || !field.cite) return { ok: false, reason: 'no-citation' };
   const { doc, page, line } = field.cite;
+  if (docName !== undefined && doc !== docName) return { ok: false, reason: 'cross-document-citation' };
   const lines = docs[doc];
   if (!lines) return { ok: false, reason: 'unknown-document' };
   const target = lines.find((l) => l.page === page && l.line === line);
@@ -46,7 +50,7 @@ export function verifyExtraction(docs, extraction) {
         continue;
       }
       if (field === null || field === undefined) { out[key] = null; continue; }
-      const result = checkCitation(docs, field);
+      const result = checkCitation(docs, field, docName);
       if (result.ok) {
         out[key] = { value: field.value, cite: { ...field.cite, text: result.line.text, sha256: result.line.sha256 } };
       } else {

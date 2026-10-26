@@ -1,0 +1,11 @@
+{
+  "id": "cite/skip-document-binding",
+  "guard": "citation-same-document",
+  "target": "src/inspection/cite.mjs",
+  "patch": {
+    "find": "if (docName !== undefined && doc !== docName) return { ok: false, reason: 'cross-document-citation' };",
+    "replace": ""
+  },
+  "expected_eval": "cite-cross-document",
+  "catcher_pattern": "a field cannot cite a line in a different document"
+}

@@ -1,0 +1,11 @@
+{
+  "id": "text-layer/merge-tiny-text-into-visible-rows",
+  "guard": "tiny-text-never-joins-visible-row",
+  "target": "src/documents/text-layer.mjs",
+  "patch": {
+    "find": "const ordered = [...group(placed.filter((part) => part.size >= HIDDEN_FONT_PT)), ...group(placed.filter((part) => part.size < HIDDEN_FONT_PT))]",
+    "replace": "const ordered = [...group(placed)]"
+  },
+  "expected_eval": "text-layer-tiny-text-not-merged",
+  "catcher_pattern": "tiny text on the same baseline as visible text is not merged into the visible line"
+}

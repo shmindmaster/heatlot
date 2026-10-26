@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { PassThrough } from 'node:stream';
@@ -76,4 +76,43 @@ test('an authorized effect reaches the server once, without the authorization in
     assert.ok(broker.ledger.read().some((r) => r.kind === 'effect_performed'));
     assert.equal(broker.verify().ok, true);
   } finally { close(); }
+});
+
+const RECORDER = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'fixtures', 'recording-mcp-server.mjs');
+
+// Sends raw lines through a proxy in front of a recording server and returns what each side saw.
+async function throughRecorder(lines) {
+  const dir = mkdtempSync(path.join(tmpdir(), 'heatlot-proxy-batch-'));
+  const log = path.join(dir, 'upstream.log');
+  writeFileSync(log, '');
+  const broker = new Broker({ dir, privateKey: generateKeys().privateKey });
+  const input = new PassThrough();
+  const output = new PassThrough();
+  const upstream = startProxy({ broker, command: process.execPath, args: [RECORDER, log], input, output, stderr: 'ignore' });
+  const replies = [];
+  let wake;
+  createInterface({ input: output }).on('line', (line) => { replies.push(JSON.parse(line)); wake?.(); });
+  const until = (done) => new Promise((resolve) => { const check = () => (done() ? resolve() : (wake = check)); check(); });
+  try {
+    for (const line of lines) input.write(`${line}\n`);
+    // A final request the proxy forwards: once it is answered, every earlier line has been handled.
+    input.write(`${JSON.stringify({ jsonrpc: '2.0', id: 'sync', method: 'tools/list' })}\n`);
+    await until(() => replies.some((r) => r.id === 'sync'));
+    return { broker, replies, seen: readFileSync(log, 'utf8').split('\n').filter(Boolean) };
+  } finally { input.end(); upstream.kill(); }
+}
+
+const call = (id, name) => ({ jsonrpc: '2.0', id, method: 'tools/call', params: { name, arguments: { to: 'a@example.com' } } });
+
+test('a JSON-RPC batch carrying a tools/call never reaches the server (batches are refused)', async () => {
+  const { broker, replies, seen } = await throughRecorder([JSON.stringify([call(1, 'send_email'), call(2, 'lookup_order')])]);
+  assert.deepEqual(seen.map((line) => JSON.parse(line).method), ['tools/list'], 'only the sync request reached the upstream');
+  assert.equal(replies.find((r) => r.id === null)?.error?.code, -32600);
+  assert.equal(broker.ledger.read().some((r) => r.kind === 'effect_performed'), false);
+});
+
+test('a bare scalar or null is refused, not forwarded and not a crash', async () => {
+  const { seen, replies } = await throughRecorder(['null', '42', '"tools/call"']);
+  assert.deepEqual(seen.map((line) => JSON.parse(line).method), ['tools/list']);
+  assert.equal(replies.filter((r) => r.id === null).length, 3);
 });

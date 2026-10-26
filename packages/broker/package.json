@@ -1,6 +1,6 @@
 {
   "name": "@heatlot/broker",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Internal: single-use payload-bound authorizations, untrusted-input refusal, and Ed25519-signed hash-chained receipts. Guards a tool function or proxies an MCP server.",
   "type": "module",
   "exports": {

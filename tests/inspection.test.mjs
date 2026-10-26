@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { HeatlotRefusal, verifyChain } from '../packages/broker/src/index.mjs';
-import { checkCitation } from '../src/inspection/cite.mjs';
+import { checkCitation, verifyExtraction } from '../src/inspection/cite.mjs';
 import { approveRelease, inspect, release } from '../src/inspection/inspect.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -125,4 +125,18 @@ test('the stored inspection is what approval and release act on', async () => {
   assert.deepEqual(stored.decision, r.decision);
   const auth = approveRelease(stored, { by: 'inspector' });
   assert.equal((await release(stored, auth)).released, true);
+});
+
+test('a field cannot cite a line in a different document', () => {
+  const docs = {
+    mtr: [{ page: 1, line: 3, text: 'Heat No: H123', sha256: 'x', hidden: false }],
+    coc: [{ page: 1, line: 2, text: 'Heat No: H999', sha256: 'y', hidden: false }],
+  };
+  const extraction = { documents: { coc: { heat_number: { value: 'H123', cite: { doc: 'mtr', page: 1, line: 3 } } } } };
+  const r = verifyExtraction(docs, extraction);
+  assert.equal(r.admitted.coc.heat_number, null);
+  assert.deepEqual(r.rejected.map((x) => x.reason), ['cross-document-citation']);
+  const own = verifyExtraction(docs, { documents: { coc: { heat_number: { value: 'H999', cite: { doc: 'coc', page: 1, line: 2 } } } } });
+  assert.equal(own.admitted.coc.heat_number.value, 'H999', 'a citation into its own document is still admitted');
+  assert.equal(checkCitation(docs, { value: 'H123', cite: { doc: 'mtr', page: 1, line: 3 } }, 'coc').reason, 'cross-document-citation');
 });
