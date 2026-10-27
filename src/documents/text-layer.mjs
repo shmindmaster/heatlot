@@ -47,17 +47,24 @@ export async function textLines(bytes) {
       const theta = Math.atan2(b, a);
       placed.push({ str: item.str, width: item.width, size, x, y, along: x * Math.cos(theta) + y * Math.sin(theta), up: -x * Math.sin(theta) + y * Math.cos(theta) });
     }
-    placed.sort((u, v) => v.up - u.up);
-    const ordered = [];
-    for (const part of placed) {
-      const row = ordered.at(-1);
-      if (row && Math.abs(row.up - part.up) <= 0.4 * Math.max(row.size, part.size)) {
-        row.parts.push(part);
-        row.size = Math.max(row.size, part.size);
-      } else {
-        ordered.push({ up: part.up, y: part.y, size: part.size, parts: [part] });
+    // Sub-threshold items never join a row of legible ones: a row's size is its largest part, so a
+    // 1 pt item on a 10 pt baseline would otherwise be read as visible text. Group the two kinds
+    // separately, then interleave the rows top to bottom.
+    const group = (parts) => {
+      const rows = [];
+      for (const part of [...parts].sort((u, v) => v.up - u.up)) {
+        const row = rows.at(-1);
+        if (row && Math.abs(row.up - part.up) <= 0.4 * Math.max(row.size, part.size)) {
+          row.parts.push(part);
+          row.size = Math.max(row.size, part.size);
+        } else {
+          rows.push({ up: part.up, y: part.y, size: part.size, parts: [part] });
+        }
       }
-    }
+      return rows;
+    };
+    const ordered = [...group(placed.filter((part) => part.size >= HIDDEN_FONT_PT)), ...group(placed.filter((part) => part.size < HIDDEN_FONT_PT))]
+      .sort((u, v) => v.up - u.up);
     ordered.forEach((row, i) => {
       row.parts.sort((u, v) => u.along - v.along);
       const text = row.parts.map((part) => part.str).join(' ').replace(/\s+/g, ' ').trim();

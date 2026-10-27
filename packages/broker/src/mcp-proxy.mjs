@@ -4,7 +4,8 @@
  *   heatlot-broker mcp-proxy --dir .heatlot --key .heatlot/key.pem -- node my-server.mjs
  *
  * Messages are relayed unchanged in both directions (newline-delimited JSON-RPC, both protocol
- * eras). Only `tools/call` is intercepted:
+ * eras). A client message that is not a single JSON object (a batch array or a bare scalar) is
+ * refused with a JSON-RPC error and never reaches the upstream server. Only `tools/call` is intercepted:
  *   - a tool whose tools/list annotations say readOnlyHint: true passes through, with a receipt;
  *   - any other tool (including one the proxy has not seen listed) needs an authorization from
  *     `heatlot-broker approve`, passed in params._meta["heatlot/authorization"]; it must match the
@@ -43,6 +44,14 @@ export function startProxy({ broker, command, args = [], input = process.stdin, 
   createInterface({ input }).on('line', (line) => {
     let message;
     try { message = JSON.parse(line); } catch { upstream.stdin.write(`${line}\n`); return; }
+    // Fail closed on any shape the proxy does not gate. A JSON-RPC batch (an array) has no
+    // top-level method, so forwarding it would let a tools/call inside skip authorization and the
+    // receipt. MCP removed batching in 2025-06-18; both revisions this repo serves (2025-11-25 and
+    // 2026-07-28) post-date that, so a batch is refused rather than unpacked.
+    if (message === null || typeof message !== 'object' || Array.isArray(message)) {
+      send({ jsonrpc: '2.0', id: null, error: { code: -32600, message: 'Invalid Request: the broker proxy accepts single JSON-RPC request objects only, not batches' } });
+      return;
+    }
     if (message.method === 'tools/list' && message.id !== undefined) pendingLists.add(message.id);
     if (message.method === 'tools/call') {
       const tool = message.params?.name;

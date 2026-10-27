@@ -1,0 +1,11 @@
+{
+  "id": "mcp-proxy/forward-batches",
+  "guard": "mcp-proxy-refuse-batches",
+  "target": "packages/broker/src/mcp-proxy.mjs",
+  "patch": {
+    "find": "if (message === null || typeof message !== 'object' || Array.isArray(message)) {",
+    "replace": "if (false) {"
+  },
+  "expected_eval": "mcp-proxy-batch-refused",
+  "catcher_pattern": "a JSON-RPC batch carrying a tools/call never reaches the server"
+}

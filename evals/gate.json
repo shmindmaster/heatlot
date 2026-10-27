@@ -5,7 +5,7 @@
     "minChecks": 9
   },
   "guardCoverage": {
-    "minMutations": 27,
+    "minMutations": 30,
     "requireAllCaught": true
   },
   "refusalCorrectness": {
