@@ -90,7 +90,7 @@ function explainTripwires(policy) {
     }
   }
   console.log('\n  Input patterns are best-effort telemetry, not the barrier. The barrier');
-  console.log('  is that the model holds no release authority — see docs/threat-model.md.');
+  console.log('  is that the model holds no release authority — see docs/SECURITY.md.');
 }
 
 const policy = loadPolicy();

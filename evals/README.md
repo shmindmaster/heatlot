@@ -74,5 +74,5 @@ grades itself.** The separation is enforced, not conventional:
   "passing" means agreeing with the dataset, not with the agent's output.
 
 Changing a subagent's scope means updating its agent file, its schema, its
-eval cases here, and `docs/architecture.md` in the same commit (see
+eval cases here, and `docs/ARCHITECTURE.md` in the same commit (see
 `AGENTS.md`).

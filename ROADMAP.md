@@ -13,7 +13,7 @@ without turning the repository into a hosted product.
 - Add more adversarial cases around policy parsing, authorization binding, and
   provider-schema differences.
 - Keep the release gate's floors (`evals/gate.json`) rising with the suite; the
-  benchmark it writes is `docs/benchmark.md`.
+  benchmark it writes is `docs/TESTING.md`.
 
 ## Next
 

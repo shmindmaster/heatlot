@@ -8,7 +8,7 @@ policy changes, and repository access.
 
 Routine fixes are decided in pull-request review. Changes to a security
 boundary, schema contract, effect, or project direction begin with a public
-issue and record the accepted trade-off in `docs/decisions/` when the decision
+issue and record the accepted trade-off in `docs/ARCHITECTURE.md` when the decision
 is durable.
 
 Decisions favor reproducible evidence over consensus by assertion. A proposed

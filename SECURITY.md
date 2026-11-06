@@ -28,5 +28,5 @@ remediation-time guarantee is made.
 High-value reports include bypasses of the effect broker, authorization replay,
 write-boundary escapes, receipt-chain tampering that goes undetected, unsafe
 provider-schema transforms, or source content that can alter a deterministic
-outcome. The documented limitations in `docs/threat-model.md` are not themselves
+outcome. The documented limitations in `docs/SECURITY.md` are not themselves
 vulnerabilities.

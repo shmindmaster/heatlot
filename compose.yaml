@@ -1,0 +1,59 @@
+name: heatlot
+
+x-app: &app
+  image: heatlot:local
+  build:
+    context: .
+    dockerfile: infra/docker/Dockerfile
+  volumes:
+    - .:/app
+    - /app/node_modules
+
+services:
+  verify:
+    <<: *app
+    command: ["npm", "run", "verify:all"]
+
+  gate:
+    <<: *app
+    command: ["npm", "run", "gate"]
+
+  drill:
+    <<: *app
+    command: ["npm", "run", "gate:drill"]
+
+  reference:
+    <<: *app
+    command: ["npm", "run", "docs:reference", "--", "--check"]
+
+  openapi:
+    <<: *app
+    command: ["npm", "run", "docs:openapi", "--", "--check"]
+
+  lint:
+    <<: *app
+    command: ["npm", "run", "lint:openapi"]
+
+  audit:
+    <<: *app
+    command: ["npm", "audit", "--omit=dev", "--audit-level=high"]
+
+  smoke:
+    <<: *app
+    command: ["npm", "run", "smoke:package"]
+
+  conformance:
+    <<: *app
+    command: ["npm", "run", "conformance:mcp"]
+
+  browser:
+    <<: *app
+    command: ["npm", "run", "test:browser"]
+
+  console:
+    <<: *app
+    command: ["npm", "run", "test:console"]
+
+  fuzz:
+    <<: *app
+    command: ["sh", "infra/docker/fuzz.sh"]

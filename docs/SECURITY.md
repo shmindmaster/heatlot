@@ -1,4 +1,4 @@
-# 1. Threat model
+# Security
 
 **Status:** current. Revise whenever a control surface changes.
 

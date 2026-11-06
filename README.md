@@ -148,9 +148,9 @@ and run in CI.
   any input that fed the decision was untrusted. There is no override flag.
 - **The receipts verify without Heatlot running.** Each one carries an Ed25519 signature and the
   hash of the one before it.
-- **CI runs the lot** on Node 22 and 24, including API fuzzing against the OpenAPI document, an
+- **CI runs the lot** in Docker on Ubuntu, including API fuzzing against the OpenAPI document, an
   MCP conformance suite, and the console in headless Chromium with an axe WCAG 2.2 AA scan. See
-  [Verification](#verification), and [`docs/threat-model.md`](docs/threat-model.md) for what the
+  [Verification](#verification), and [`docs/SECURITY.md`](docs/SECURITY.md) for what the
   design stops and what it does not.
 
 ## The agent drafts. Software decides.
@@ -183,8 +183,8 @@ The broker is extracted as [`packages/broker`](packages/broker/), a zero-depende
 can guard any tool function or sit in front of an MCP server. It is internal until it ships
 inside the `heatlot` package.
 
-[`docs/architecture.md`](docs/architecture.md) covers each surface and maps it to Anthropic's and
-OpenAI's published agent guidance. [`docs/threat-model.md`](docs/threat-model.md) states what the
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) covers each surface and maps it to Anthropic's and
+OpenAI's published agent guidance. [`docs/SECURITY.md`](docs/SECURITY.md) states what the
 design stops and what it does not.
 
 ## Status
@@ -192,7 +192,7 @@ design stops and what it does not.
 Heatlot is pre-release. The full inspection flow runs and is tested in CI, on synthetic data. It
 is not published on npm. `npm view heatlot` returned a 404 on 2026-10-21, and the package is
 installed from its tarball and run in CI (`smoke:package`). The first publish waits on the
-maintainer's npm login ([RELEASING.md](docs/RELEASING.md)).
+maintainer's npm login ([DEPLOYMENT.md](docs/DEPLOYMENT.md)).
 
 | Milestone | State |
 |---|---|
@@ -260,13 +260,13 @@ nothing to enforce it.
 | `npm run smoke:package` | The npm package installs from its tarball and runs on its own |
 | `npm run smoke:mcp` / `conformance:mcp` | The MCP server across both protocol eras, plus the official conformance suite with a baseline that may only shrink |
 
-CI runs all of it on Node 22 and 24. The evidence behind each claim, with run IDs, is in
-[`docs/verification/`](docs/verification/).
+CI runs all of it in Docker on Ubuntu. The evidence behind each claim, with run IDs, is in
+[`docs/OPERATIONS.md`](docs/OPERATIONS.md) and [`docs/TESTING.md`](docs/TESTING.md).
 
 ## Contributing, security and license
 
 - **Contributing:** read [CONTRIBUTING.md](CONTRIBUTING.md). Every change keeps
-  `npm run verify:all` and `npm run gate` green, and a new guard needs a mutation that proves it
+  `docker compose run --rm verify` and `docker compose run --rm gate` green, and a new guard needs a mutation that proves it
   can fail.
 - **Security:** report vulnerabilities through a
   [GitHub security advisory](https://github.com/shmindmaster/heatlot/security/advisories/new),
