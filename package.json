@@ -103,12 +103,12 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
-    "@modelcontextprotocol/client": "^2.3.1",
+    "@modelcontextprotocol/client": "^2.4.0",
     "@modelcontextprotocol/conformance": "0.2.0-alpha.12",
-    "@redocly/cli": "^2.64.1",
+    "@redocly/cli": "^2.76.0",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "pdf-lib": "^1.17.1",
-    "playwright": "1.64.1"
+    "playwright": "1.65.0"
   }
 }
