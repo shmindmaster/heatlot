@@ -1,7 +1,7 @@
 # heatlot
 
 Receiving inspection for supplier certificates and mill test reports. The model
-drafts; software decides. `packages/broker` is the published effect broker.
+drafts; software decides. `packages/broker` contains the effect broker.
 `mcp-servers/kestrel-foundry-data` is the read-only data boundary. `mcp-servers/heatlot`
 calls the same routes as the HTTP API. Kestrel Castings is fictional.
 
