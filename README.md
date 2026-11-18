@@ -11,6 +11,7 @@ For receiving-inspection and supplier-quality teams.
 [![CI](https://github.com/shmindmaster/heatlot/actions/workflows/ci.yml/badge.svg)](https://github.com/shmindmaster/heatlot/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/shmindmaster/heatlot/actions/workflows/codeql.yml/badge.svg)](https://github.com/shmindmaster/heatlot/actions/workflows/codeql.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![npm](https://img.shields.io/npm/v/heatlot.svg)](https://www.npmjs.com/package/heatlot)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D22.13-339933?logo=node.js&logoColor=white)](package.json)
 
 [What it checks](#what-it-checks) · [Try it](#try-it) · [Why trust the verdict](#why-the-verdict-can-be-trusted) · [Architecture](#the-agent-drafts-software-decides) · [Status](#status) · [Limits](#limits) · [Contributing](#contributing-security-and-license)
@@ -19,9 +20,9 @@ For receiving-inspection and supplier-quality teams.
 
 ---
 
-> **Pre-release, synthetic data only.** Every packet, company, mill, part number and
-> specification in this repository is invented, and Heatlot has only been run on those. It is
-> not published on npm yet, so you install it from a clone. See [Status](#status).
+> **Synthetic data only.** Every packet, company, mill, part number and specification in this
+> repository is invented, and Heatlot has only been run on those. It is a reference
+> implementation, not a hosted service or a compliance certification. See [Status](#status).
 
 ## What it does
 
@@ -72,20 +73,23 @@ the PDF with cited highlights, the rule-by-rule verdict, release and the receipt
 
 ## Try it
 
-You need Node.js 22.13 or newer.
+You need Node.js 22.13 or newer. The fastest way is zero-install:
+
+```bash
+npx heatlot demo
+```
+
+No clone, no API key, and no network call after the package downloads. `demo` runs packet
+PKT-24002, a PO line for 4140 bar with a mill test report and a certificate of conformance. It
+exits with code 3 (INCOMPLETE), so your shell may print an error line after the output. That is
+the expected result.
+
+For the full flow — the eight synthetic packets, the console and the mutation harness — clone
+the repository:
 
 ```bash
 git clone https://github.com/shmindmaster/heatlot
 cd heatlot && npm install
-npm run heatlot -- demo
-```
-
-No API key or network call is needed after `npm install`. `demo` runs packet PKT-24002, a PO
-line for 4140 bar with a mill test report and a certificate of conformance. It exits with code 3
-(INCOMPLETE), so `npm` may print an error line after the output. That is the expected result.
-You can also run the packet directly:
-
-```bash
 npm run heatlot -- verify data/packets/PKT-24002
 ```
 
@@ -141,8 +145,8 @@ You should not have to take the model's word, or this README's. The checks are i
 and run in CI.
 
 - **The model's draft verdict is recorded and never acted on.** Only the rules produce a verdict.
-- **Each guard has a mutation.** `npm run evals:mutate` applies 26 patches, each one removing a
-  check, and requires the suite to catch every one. It reports 26 of 26 caught.
+- **Each guard has a mutation.** `npm run evals:mutate` applies 30 patches, each one removing a
+  check, and requires the suite to catch every one. It reports 30 of 30 caught.
 - **Release is a ledger fact.** An authorization is bound to the hash of the exact decision,
   checked against the receipt ledger so single use survives a restart, and refused outright when
   any input that fed the decision was untrusted. There is no override flag.
@@ -189,10 +193,10 @@ design stops and what it does not.
 
 ## Status
 
-Heatlot is pre-release. The full inspection flow runs and is tested in CI, on synthetic data. It
-is not published on npm. `npm view heatlot` returned a 404 on 2026-10-21, and the package is
-installed from its tarball and run in CI (`smoke:package`). The first publish waits on the
-maintainer's npm login ([DEPLOYMENT.md](docs/DEPLOYMENT.md)).
+Heatlot is an early public reference implementation. The full inspection flow runs and is tested
+in CI, on synthetic data. The `heatlot` package is published on npm (v0.4.0): `npx heatlot demo`
+runs the hero packet with no clone and no API key. Every release passes the full gate before the
+GitHub release and the npm publish ([DEPLOYMENT.md](docs/DEPLOYMENT.md)).
 
 | Milestone | State |
 |---|---|
@@ -202,7 +206,7 @@ maintainer's npm login ([DEPLOYMENT.md](docs/DEPLOYMENT.md)).
 | Specification rules, verdicts, single-use release, quarantine and NCR | **Done**, CLI `heatlot verify` |
 | HTTP API with a generated OpenAPI 3.1 document and Scalar docs; MCP server | **Done**, `heatlot serve`, `/docs/api` |
 | Inspection console: queue, PDF with cited highlights, rule-by-rule verdict, release, receipt chain | **Done**, `npm run serve` then http://127.0.0.1:4140 |
-| npm package `heatlot` | Ready to publish, not published |
+| npm package `heatlot` | **Published** v0.4.0 — `npx heatlot demo` |
 
 Specification tables are modelled on the shape of public material specifications; no
 specification text is copied.
@@ -251,7 +255,7 @@ nothing to enforce it.
 | Command | Proves |
 |---|---|
 | `npm test` | Unit tests for the inspection flow, the control layer and `packages/broker` |
-| `npm run evals:mutate` | Every guard can fail: 27/27 mutations caught |
+| `npm run evals:mutate` | Every guard can fail: 30/30 mutations caught |
 | `npm run verify:all` | Everything deterministic, at the expected exit codes |
 | `npm run gate` / `gate:drill` | The release gate holds its floors and blocks each deliberate regression |
 | `npm run docs:openapi -- --check` / `lint:openapi` | The committed OpenAPI 3.1 document is generated from the code, and passes Redocly |
@@ -273,4 +277,4 @@ CI runs all of it in Docker on Ubuntu. The evidence behind each claim, with run 
   as described in [SECURITY.md](SECURITY.md).
 - **License:** [Apache-2.0](LICENSE).
 
-Created and maintained by [Sarosh Hussain](https://saroshhussain.com).
+Created and maintained by [Sarosh Hussain](https://github.com/shmindmaster).
