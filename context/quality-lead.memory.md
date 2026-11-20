@@ -5,7 +5,9 @@ Read this at the start of every session.
 ## Current digest
 - Week ending: 2026-08-02. Dataset anchor ("today"): 2026-08-06.
 - Digest input: `reports/drafts/digest-input-2026-08-02.json`.
-- Render: `node scripts/render-digest.mjs --input reports/drafts/digest-input-2026-08-02.json`.
+- This is the original foundry workflow context, not the packet console.
+- No digest renderer currently ships. Keep validated digest input as a draft;
+  `scripts/render-explorer.mjs` renders receipt exploration, not digest input.
 
 ## Subagent roster (delegate via Task; never do their work)
 | Subagent | Owns | Draft output |
@@ -29,4 +31,4 @@ Each draft validates against its schema in `schemas/` before you compose it. A f
 - Audit EA-7 / EA-8 absent.
 
 ## Turn discipline
-Plan, delegate, compose, done. One pass. Stop when the digest renders.
+Plan, delegate, compose, done. One pass. Stop when the digest input validates.

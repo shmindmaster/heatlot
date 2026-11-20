@@ -4,17 +4,57 @@ Heatlot is a working example of one idea: when an LLM agent is put in front of a
 decision that matters, the model should draft and software should decide. The
 model is good at reading a heterogeneous pile of documents and writing a
 coherent account of it. It is not a place to put a guarantee. So every guarantee
-is moved out of it ΓÇö into schemas, policy files, deterministic verifiers, an
-effect broker and a receipt ledger ΓÇö and what remains inside is judgment and
+is moved out of it — into schemas, policy files, deterministic verifiers, an
+effect broker and a receipt ledger — and what remains inside is judgment and
 language.
 
-The demonstration domain is a quality department at a sand-casting foundry,
+The original control-layer demonstration is a quality department at a sand-casting foundry,
 because releasing a certificate of conformance is a decision with an evidence
 trail: either the tensile test report for that heat exists or it does not. That
 makes the difference between a plausible answer and a true one observable in a
 terminal, which is hard to arrange in most domains.
 
 Everything under `data/` is synthetic and seeded. Kestrel Castings is fictional.
+
+## Current inspection path
+
+The primary product is supplier-PDF receiving inspection. The S1–S7 surfaces below
+describe the original foundry example, which remains executable; they are not all
+stages of the packet inspector.
+
+```mermaid
+flowchart LR
+    CLI[CLI] --> I[Inspection]
+    Console[Console] --> HTTP[Hono HTTP routes]
+    MCP[Heatlot MCP tools] --> HTTP
+    HTTP --> I
+    Packet[Packet PDFs and manifest] --> I
+    I --> Text[PDF lines and trust labels]
+    Text --> Extract[Authored replay or reference reader]
+    Extract --> Cite[Citation checks]
+    Cite --> Rules[Deterministic spec rules]
+    Spec[Generated specification data] --> Rules
+    Rules --> Verdict{Verdict}
+    Verdict -->|INCOMPLETE or NONCONFORMING| NCR[Quarantine and NCR]
+    Verdict -->|ACCEPT| Approval[Inspector approval]
+    Approval --> Broker[packages/broker]
+    Broker --> Release[Release once]
+    I -.-> Ledger[Signed receipt chain]
+    Broker -.-> Ledger
+```
+
+`src/inspection/inspect.mjs` orchestrates this path. Rules are in
+`src/inspection/rules.mjs`; requirements are generated under `data/specs/`.
+PDF extraction providers here are separate from `src/providers/` (the original
+typed-decision adapters). HTTP and MCP share the route implementation, but MCP
+intentionally exposes no approve or release operation. Inspect can write an NCR
+and a stored inspection as well as receipts.
+
+Release uses the extracted broker, not `src/effects/broker.mjs`, which remains
+the original foundry publish boundary. Packet receipts are Ed25519-signed under
+`.heatlot/<packet>/` by default; the older foundry ledger below is an unsigned
+hash chain under `ledger/`. Neither has an external anchor.
+See [Integrations](INTEGRATIONS.md) for configuration and route discovery.
 
 ## 1.1 Reading order
 
@@ -57,7 +97,7 @@ happens rather than reconstructed afterwards from logs.
 
 # 2. The control surfaces
 
-## 2.1 S1 ΓÇö Context assembler
+## 2.1 S1 — Context assembler
 
 **What it is.** `src/context/assembler.mjs` takes `{agent, task, entityRefs}` and
 returns a `ContextBundle`: an ordered list of blocks, each carrying its source
@@ -75,7 +115,7 @@ reached the model, and you can diff two runs.
 npm run context -- --agent coc-assembler --po PO-AER-5519
 ```
 
-The budget comes from `policy/policy.json` ΓåÆ `agents.<name>.contextBudgetTokens`.
+The budget comes from `policy/policy.json` → `agents.<name>.contextBudgetTokens`.
 Over budget, blocks drop by ascending priority and **every drop is recorded**.
 Silent truncation is the failure this surface exists to prevent, so a dropped
 block that does not appear in `dropped` is a defect, not an optimization.
@@ -84,7 +124,7 @@ block that does not appear in `dropped` is a defect, not an optimization.
 its budget may be slightly mis-sized; it is deterministic, so it fails the same
 way every time. A source file that is unreadable is an error, not an omission.
 
-## 2.2 S2 ΓÇö Typed decisions
+## 2.2 S2 — Typed decisions
 
 **What it is.** `schemas/` holds five JSON Schema draft 2020-12 documents and is
 the single source of truth. `src/decisions/registry.mjs` binds each decision to
@@ -93,12 +133,12 @@ same schema:
 
 | Path | Mechanism | Enforcement |
 |---|---|---|
-| `src/providers/anthropic.mjs` | strict tool use | grammar-constrained sampling ΓÇö an out-of-schema value is unrepresentable |
+| `src/providers/anthropic.mjs` | strict tool use | grammar-constrained sampling — an out-of-schema value is unrepresentable |
 | `src/providers/openai.mjs` | structured outputs | response format derived by a documented transform |
 | `src/providers/repair.mjs` | validate and repair | Ajv error fed back, at most two retries, then fail closed |
 
 The OpenAI path needs a subset of JSON Schema that the canonical documents do not
-satisfy verbatim ΓÇö every object requiring `additionalProperties: false` and every
+satisfy verbatim — every object requiring `additionalProperties: false` and every
 property listed in `required`. That variant is **derived**, not maintained
 separately, because two hand-written copies of a contract are one contract and
 one lie.
@@ -119,7 +159,7 @@ useful output of this surface.
 look enforced, because everything validates. The repair loop is bounded, so a
 model that cannot produce a valid object fails rather than looping.
 
-## 2.3 S3 ΓÇö Policy engine and hooks
+## 2.3 S3 — Policy engine and hooks
 
 **What it is.** `policy/policy.json` is the only place permissions, write
 boundaries and tripwires live. `hooks/publish-gate.mjs` reads it and enforces the
@@ -142,11 +182,11 @@ npm run demo:denied
 ```
 
 **How it fails.** The input patterns are regexes and will miss novel phrasings.
-They are telemetry, not the barrier ΓÇö the barrier is that the model has no
+They are telemetry, not the barrier — the barrier is that the model has no
 release authority. Treating tripwire coverage as the defense is the mistake this
 design is built to avoid.
 
-## 2.4 S4 ΓÇö Deterministic verifier
+## 2.4 S4 — Deterministic verifier
 
 **What it is.** `scripts/verify-completeness.mjs` resolves each required record
 for a purchase order against `data/index.json`, cites it by path and sha256, and
@@ -155,15 +195,15 @@ returns a typed verdict with `inputs[]`, `rule`, `verdict` and `missing[]`.
 Exit codes are a contract and are tested as one: `0` complete, `3` incomplete.
 
 **Why it exists.** A schema proves shape, not truth. A well-formed report citing
-records that do not exist validates perfectly ΓÇö
+records that do not exist validates perfectly —
 `evals/expected/coc-report.fabricated.invalid.json` is that object. Something has
 to check the world, and it cannot be the thing that wrote the claim.
 
 **How it fails.** It knows about record presence and content hashes. It does not
 know whether a tensile result is metallurgically plausible, and it enforces a
-wrong rule exactly as faithfully as a right one. See `docs/SECURITY.md` ┬º4.
+wrong rule exactly as faithfully as a right one. See `docs/SECURITY.md` §4.
 
-## 2.5 S5 ΓÇö Effect broker
+## 2.5 S5 — Effect broker
 
 **What it is.** `src/effects/broker.mjs` is the only module permitted to publish
 or write outside `reports/drafts/`. `broker.perform(effect, authorization)` where
@@ -171,12 +211,12 @@ the authorization was minted by `src/effects/authorization.mjs` from a verdict.
 
 An authorization is:
 
-- bound to the sha256 of the effect payload ΓÇö edit the draft and it stops matching;
-- bound to the verdict's input hashes ΓÇö change a source record and it stops matching;
-- single-use ΓÇö consumption is an `authorization_consumed` receipt on the
+- bound to the sha256 of the effect payload — edit the draft and it stops matching;
+- bound to the verdict's input hashes — change a source record and it stops matching;
+- single-use — consumption is an `authorization_consumed` receipt on the
   subject's ledger, so a replay is refused even by a freshly started process,
   and the refusal is recorded;
-- ledger-minted ΓÇö it carries `mint_seq`, and is honoured only if the receipt at
+- ledger-minted — it carries `mint_seq`, and is honoured only if the receipt at
   that position is its own `authorization_minted` record;
 - refused outright if any contributing context block was marked `untrusted`.
 
@@ -184,12 +224,12 @@ There is no override flag and no environment variable that bypasses it. That
 absence is load-bearing: an override that exists gets used, and the guarantee then
 reduces to the discipline of whoever holds it.
 
-**How it fails.** Concentration ΓÇö a defect in the broker is a defect in every
+**How it fails.** Concentration — a defect in the broker is a defect in every
 guarantee, which is why `evals/mutations/` aims directly at it. A process that
 bypasses the agent entirely is not constrained by it; this is a boundary, not a
 sandbox.
 
-## 2.6 S6 ΓÇö Receipt ledger
+## 2.6 S6 — Receipt ledger
 
 **What it is.** `src/ledger/index.mjs` writes append-only JSONL under `ledger/`,
 one chain per subject. Each receipt carries the hash of its canonicalized payload
@@ -197,7 +237,7 @@ and of its predecessor; the genesis receipt's predecessor is 64 zeros. Sequence 
 a monotonic logical counter, **not** a wall clock, so a run is reproducible and
 two runs can be diffed.
 
-Receipt kinds come from `policy/policy.json` ΓåÆ `ledger.kinds`: `context_assembled`,
+Receipt kinds come from `policy/policy.json` → `ledger.kinds`: `context_assembled`,
 `decision_requested`, `decision_returned`, `verdict`, `authorization_minted`,
 `effect_performed`, `effect_denied`, `tripwire_fired`.
 
@@ -208,17 +248,17 @@ npm run audit -- --po PO-AER-5519
 npm run audit:tamper
 ```
 
-`audit` reconstructs the whole decision from receipts alone ΓÇö no model, no source
-documents ΓÇö verifies the chain, and renders `reports/audit/<subject>.html`.
+`audit` reconstructs the whole decision from receipts alone — no model, no source
+documents — verifies the chain, and renders `reports/audit/<subject>.html`.
 
 **How it fails.** A chain held on one host detects alteration, not replacement:
 anyone with write access can regenerate a consistent chain. Closing that needs an
 external anchor, which this repository does not have and does not claim.
-Canonicalization is load-bearing ΓÇö hashes are taken over JSON with keys sorted
+Canonicalization is load-bearing — hashes are taken over JSON with keys sorted
 recursively, and without that an identical payload serialized differently breaks
 the chain for no reason.
 
-## 2.7 S7 ΓÇö Evals and the mutation harness
+## 2.7 S7 — Evals and the mutation harness
 
 **What it is.** `evals/cases/` and `evals/expected/` hold the suite, refusal cases
 included. `evals/mutations/*.json` hold declarative patches, each naming the eval
@@ -245,7 +285,9 @@ guard.
 
 # 3. Agent topology
 
-An orchestrator-workers pattern with a deterministic router.
+The original workflow uses an orchestrator-workers design. The retained memory
+files and policy describe these roles; the checkout does not ship an executable
+agent router or digest renderer.
 
 ```mermaid
 flowchart LR
@@ -257,11 +299,11 @@ flowchart LR
     A & B & C & D --> M[(kestrel-foundry-data<br/>10 read-only tools)]
 ```
 
-The primary agent holds no MCP tools. It routes each request to exactly one
-subagent and composes the weekly digest from their outputs. Subagents declare
-their full tool inventory in frontmatter and may not exceed it; the same
-inventory appears in `policy/policy.json`, which is what `npm run policy:explain`
-reads.
+The intended primary role holds no MCP tools and delegates to a specialist before
+composing digest input. The current inventory is declared in `policy/policy.json`,
+which is what `npm run policy:explain` reads; role memory lives in `context/`.
+The executable demos exercise the deterministic control layer directly rather
+than launching this agent topology.
 
 Scope was chosen narrowly on purpose. `ncr-triage` classifies a nonconformance
 and flags a repeat offender; it does not disposition. `coc-assembler` reports
@@ -273,7 +315,7 @@ action, and the step it stops short of is the one S4 and S5 own.
 Agents never read `data/` directly. `mcp-servers/kestrel-foundry-data/` exposes
 ten read-only tools, prunes its outputs, hash-verifies `get_document` against
 `data/index.json`, and refuses unindexed path traversal. There are no write tools
-on the server at all ΓÇö writing is an effect, and effects go through S5.
+on the server at all — writing is an effect, and effects go through S5.
 
 The server is built on the MCP TypeScript SDK v2 (`@modelcontextprotocol/server`
 2.3.1, spec revision 2026-07-28) over stdio, with zod 4 as the single schema
@@ -297,8 +339,8 @@ reads no wall clock, so `npm run generate:data` reproduces every byte and
 `data/index.json` carries a sha256 per document plus counts.
 
 The dataset is built around five facts that the demos depend on; they are listed
-in `README.md` ┬º6. The important structural property is that each is *resolvable*
-ΓÇö present or absent against the index ΓÇö rather than something a reader has to
+in `docs/DATA.md`. The important structural property is that each is *resolvable*
+— present or absent against the index — rather than something a reader has to
 take on trust.
 
 `data/` is immutable to agents. Changing it means changing the generator.
@@ -346,10 +388,10 @@ moment.
 
 | Question | What it gates | Who resolves it |
 |---|---|---|
-| Anchor the ledger head externally ΓÇö signature, witness, or transparency log? | Whether tamper-evidence survives a host compromise (┬º2.6) | Repository owner |
-| Supplement tripwire regexes with a classifier? | Injection telemetry coverage, not the barrier (┬º2.3) | Repository owner |
-| Should authorizations expire on the logical clock as well as being single-use? | Whether long-lived tokens matter under concurrency (┬º2.5) | Repository owner |
-| What review does a change to a deterministic rule require? | The central risk in `docs/SECURITY.md` ┬º4 | Repository owner |
+| Anchor the ledger head externally — signature, witness, or transparency log? | Whether tamper-evidence survives a host compromise (§2.6) | Repository owner |
+| Supplement tripwire regexes with a classifier? | Injection telemetry coverage, not the barrier (§2.3) | Repository owner |
+| Should authorizations expire on the logical clock as well as being single-use? | Whether long-lived tokens matter under concurrency (§2.5) | Repository owner |
+| What review does a change to a deterministic rule require? | The central risk in `docs/SECURITY.md` §4 | Repository owner |
 | Is the token-count approximation in S1 close enough to trust near a budget edge? | Whether a bundle can silently exceed a real model's window | Repository owner |
 
 ## Published guidance this follows
@@ -385,7 +427,7 @@ here is "does this record exist and hash as claimed". Yours might be "does this
 invoice line reconcile to a purchase order", "is this claim code valid for this
 diagnosis", "does this filing cite a case that exists". If nothing in your system
 can answer the question, S4 has nothing to compute and the model's judgment is
-all you have ΓÇö be honest about that rather than dressing it up.
+all you have — be honest about that rather than dressing it up.
 
 **Being wrong is expensive enough to justify refusing.** A control layer's
 characteristic behaviour is declining to act. In a domain where stopping costs
@@ -411,7 +453,7 @@ In rough order of effort.
 
 These are the pattern, not the example.
 
-`src/ledger/` is domain-free ΓÇö receipts, hashing and chain verification do not
+`src/ledger/` is domain-free — receipts, hashing and chain verification do not
 know what a heat lot is.
 
 `src/effects/` is domain-free apart from which verdict authorizes which effect,
@@ -424,20 +466,20 @@ not about what the schemas describe.
 configuration.
 
 If you find yourself editing one of these to accommodate your domain, something
-domain-specific has leaked into a general layer ΓÇö that is the signal to push it
+domain-specific has leaked into a general layer — that is the signal to push it
 back out into `policy/policy.json` or a schema.
 
 ## 1.4 The order that works
 
 1. **Write the verifier first**, before any agent. If you cannot compute your
-   correctness rule deterministically, stop ΓÇö you have learned the most important
+   correctness rule deterministically, stop — you have learned the most important
    thing about the project, and it is better learned now.
 2. **Write the refusal eval second.** One case where the rule says no, and the
    exit code that means it. This is your contract.
 3. **Write the mutation third.** Break the verifier deliberately and confirm the
    refusal case notices. A guard you have not seen fail is not yet evidence.
 4. **Then the schema, then the agent.** By this point the agent has nothing to
-   prove ΓÇö the guarantee is already held elsewhere, and the agent is a drafting
+   prove — the guarantee is already held elsewhere, and the agent is a drafting
    convenience.
 
 That order is deliberately the reverse of how agent projects usually go. Starting
@@ -449,9 +491,9 @@ Moving authority out of the model does not eliminate the risk of being wrong. It
 relocates it into `scripts/verify-*.mjs`, where a mistake is enforced precisely,
 every time, with a receipt attesting to it.
 
-That trade is worth making ΓÇö systematic errors are findable and unpredictable
-ones are not ΓÇö but it means the deterministic rules deserve the review attention
-that would otherwise go to prompts. `docs/SECURITY.md` ┬º4 states this plainly,
+That trade is worth making — systematic errors are findable and unpredictable
+ones are not — but it means the deterministic rules deserve the review attention
+that would otherwise go to prompts. `docs/SECURITY.md` §4 states this plainly,
 and it is the thing most likely to bite a port.
 
 ## Decisions
@@ -487,7 +529,7 @@ sees.
 for *whether*.
 
 **A stricter output schema.** Rejected because a schema proves shape, not truth.
-`evals/expected/coc-report.fabricated.invalid.json` is the demonstration ΓÇö a
+`evals/expected/coc-report.fabricated.invalid.json` is the demonstration — a
 report citing records that do not exist validates cleanly against
 `coc-report.schema.json`. Shape and truth are orthogonal, and conflating them is
 the most common error in this design space.
@@ -532,8 +574,8 @@ logical counter, not a wall clock.
 
 The record has to answer a question after the fact, to someone who was not
 present and has no reason to trust the operator: *on what basis was this
-released?* A log answers a weaker question ΓÇö what the process printed about
-itself ΓÇö and it answers that only if nobody has edited it since.
+released?* A log answers a weaker question — what the process printed about
+itself — and it answers that only if nobody has edited it since.
 
 The logical counter is a second constraint, and a less obvious one. Wall-clock
 timestamps make every run differ, which means a reviewer cannot diff two runs and
@@ -554,7 +596,7 @@ bad idea. It answers *who wrote this* where the chain answers *has this been
 altered*, and it needs key management that a clone-and-run repository should not
 require. Recorded as an open question in the threat model.
 
-**Recording only releases.** Rejected. Refusals are the more interesting record ΓÇö
+**Recording only releases.** Rejected. Refusals are the more interesting record —
 `npm run demo:injection` is a refusal, and a system that logs only its successes
 cannot show that it declined when it should have.
 
@@ -589,7 +631,7 @@ scratch copy; broken code is never committed.
 ## 3.2 The constraint that forced it
 
 A green suite is evidence of nothing on its own. It is consistent with thorough
-coverage and equally consistent with assertions that cannot fail ΓÇö a check that
+coverage and equally consistent with assertions that cannot fail — a check that
 reads a value the operation never changes, a test that would pass against a
 deleted guard.
 
@@ -606,7 +648,7 @@ not that anything would have noticed it misbehaving. A suite that calls every
 guard and asserts nothing reports excellent coverage.
 
 **An off-the-shelf mutation testing library.** Rejected because generic operators
-mutate everything and produce mostly noise ΓÇö a flipped comparison in a rendering
+mutate everything and produce mostly noise — a flipped comparison in a rendering
 helper is a survivor nobody should care about, and triaging those buries the five
 that matter. The mutations here are chosen to target specific guards and each
 names the eval case expected to catch it, which makes a survivor immediately
@@ -653,14 +695,14 @@ Three constraints, all pointing the same way.
 **Adoption.** A reviewer decides whether to read this in the first minute. A
 prompt for a key spends that minute and usually ends the evaluation.
 
-**Reproducibility.** The demos assert on exact output ΓÇö a missing record, a
+**Reproducibility.** The demos assert on exact output — a missing record, a
 refusal, a `+31.8%` variance. A live model makes each run different, and a demo
 that differs per run cannot be audited, which contradicts the repository's entire
 argument.
 
 **What is being demonstrated.** The claim is about the control layer, not about
-model quality. The hero case needs the model to produce a specific wrong answer ΓÇö
-`COMPLETE` for PO-AER-5519 ΓÇö so the broker can be seen catching it. Sampling for
+model quality. The hero case needs the model to produce a specific wrong answer —
+`COMPLETE` for PO-AER-5519 — so the broker can be seen catching it. Sampling for
 that is unreliable and expensive; recording it is neither.
 
 ## 4.3 Alternatives rejected
@@ -677,7 +719,7 @@ stubbed past. The distinction is the difference between testing the thing and
 testing around it.
 
 **Dropping the live path entirely.** Rejected. Without it the adapters are
-unfalsifiable ΓÇö the fixtures would only ever prove they agree with themselves.
+unfalsifiable — the fixtures would only ever prove they agree with themselves.
 `npm run verify:live` is how a change to an adapter gets checked against the real
 API, deliberately and by choice, rather than on every run. It replays the
 injection scenario against the live model and records provenance on every
@@ -697,8 +739,8 @@ possible moment.
 
 The replay key is a hash of decision id, prompt hash and provider name, so any
 change to prompt assembly invalidates the fixtures. That coupling is intentional
-ΓÇö a fixture that survives a prompt change is no longer recording the same
-question ΓÇö but it makes prompt edits more expensive than they look.
+— a fixture that survives a prompt change is no longer recording the same
+question — but it makes prompt edits more expensive than they look.
 
 # 0005. Synthetic supplier packets as generated PDFs
 
@@ -733,8 +775,9 @@ transparent, or in a layer that is off.
 - The packets reproduce byte for byte; `verify:all` regenerates them and CI fails if they drift.
 - The hero packet (PKT-24002) has no tensile result and a one-point white line telling an
   automated reviewer the test was waived. It is the case the film and the evals are built on.
-- Hidden-text detection by font size catches this attack, not every one: white text at normal
-  size, or text under an image, needs the rendering-based check planned for the extraction step.
+- Detection now includes subtext-scan checks for colour/background, cover, clip,
+  render mode, opacity and layer as well as tiny type. Text in images, text over
+  photographs and tampered font maps remain outside the detection guarantee.
 
 # 0006. Cited extraction; the rules decide; release through the broker
 
