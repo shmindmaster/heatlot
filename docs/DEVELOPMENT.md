@@ -35,14 +35,10 @@ examples. Output persists in the checkout's `.heatlot/`; `HEATLOT_OUT` or CLI
 `--out` selects another directory.
 
 For the console, run `npx heatlot@0.4.0 serve` outside the checkout with existing
-Node >=22.13. The server binds only to loopback. On Linux with Docker, use:
-
-```text
-docker compose run --rm --network host verify npm run serve
-```
-
-Open http://127.0.0.1:4140; plain `-p` mapping cannot reach the container's
-loopback listener. The Compose `console` service runs browser tests, not a server.
+Node >=22.13, then open http://127.0.0.1:4140. The server binds to
+`127.0.0.1` only (`bin/heatlot.mjs`), so a container's listener is not reachable
+through `docker compose run -p`; there is no Compose service that serves the
+console. The Compose `console` service runs browser tests, not a server.
 [Integrations](INTEGRATIONS.md) documents routes and configuration.
 
 ## Add a guard and its mutation
