@@ -41,7 +41,6 @@ const pick = (arr) => arr[Math.floor(rng() * arr.length)];
 const randint = (a, b) => a + Math.floor(rng() * (b - a + 1));
 const around = (base, spread) => base + (rng() * 2 - 1) * spread;
 const r1 = (x) => Math.round(x * 10) / 10;
-const r2 = (x) => Math.round(x * 100) / 100;
 const r3 = (x) => Math.round(x * 1000) / 1000;
 
 // ---------- calendar helpers (deterministic) ----------
@@ -90,8 +89,6 @@ const PARTS = [
   { pn: 'KC-1030', name: 'Main Rotor Hub Housing', alloy: 'ZE41A', weight: 3900, customer: 'Helix Rotorcraft' },
 ];
 
-const CUSTOMERS = ['Aerbridge Systems', 'Helix Rotorcraft', 'Meridian Aerostructures', 'Kestrel Defense Systems', 'Summit Aero Engines'];
-
 const DEFECT_TYPES = ['porosity', 'shrinkage', 'sand-inclusion', 'misrun-cold-shut', 'dimensional', 'chemistry'];
 
 const CAUSE_CODES = {
@@ -126,8 +123,6 @@ const DEFECT_CELLS = {
   'dimensional': ['Inspection', 'Finishing'],
   'chemistry': ['Melting'],
 };
-
-const CELLS = ['Molding', 'Melting', 'Core Room', 'Heat Treat', 'Finishing', 'Inspection'];
 
 // ---------- heat lots ----------
 // 20 heats HT-4460..HT-4479 poured May-Aug 2026. HT-4471 pours KC-1001 for PO-AER-5519

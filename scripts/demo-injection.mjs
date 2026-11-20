@@ -14,8 +14,6 @@
  * Runs offline against a recorded fixture. No API key.
  */
 import { rmSync, mkdirSync } from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 import { assemble } from '../src/context/assembler.mjs';
 import { completeWithProvenance } from '../src/providers/index.mjs';
@@ -23,7 +21,6 @@ import { createVerdictRecord } from '../src/effects/authorization.mjs';
 import { mintAndPerform } from '../src/effects/broker.mjs';
 import { append, ledgerDir, ledgerPath, verifyChain, readChain } from '../src/ledger/index.mjs';
 
-const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SUBJECT = 'PO-AER-5519';
 const AGENT = 'coc-assembler';
 
