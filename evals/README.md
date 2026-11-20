@@ -10,7 +10,13 @@ makes about agent behavior is backed by a process exit code, not by prose.
   (used by `--live` mode); `expect` is the machine-checkable truth.
 - `expected/*.json` — schema fixtures consumed by `scripts/validate-schemas.mjs`:
   `*.valid.json` must validate, `*.invalid.json` must be rejected.
-- The runner is `scripts/run-evals.mjs`.
+- The runner is `scripts/run-evals.mjs`: six cases plus two deterministic CoC
+  draft checks and schema fixtures, for nine checks.
+- `mutations/*.json` — 30 guard-removal patches, run in scratch copies.
+- `gate.json` — release floors: at least nine eval checks, at least 30 mutations
+  all caught, expected verifier exits, injection refusal receipts, two-run
+  replay determinism and audit replay.
+- `regressions/` — deliberate regressions that `gate:drill` must block.
 
 ## What the suite proves (structural guarantees)
 
@@ -41,17 +47,23 @@ makes about agent behavior is backed by a process exit code, not by prose.
    `scripts/validate-schemas.mjs` (default mode) and requires exit 0: all five
    schemas compile and every `expected/` fixture behaves as named — including
    `coc-report.fabricated.invalid.json`, a CoC report that claims a missing
-   record is present, which the schema must reject.
+   record is present, which the schema must reject. Schema validation does not
+   establish that a real file has the claimed hash; the two deterministic CoC
+   draft checks separately verify the canonical draft and reject a fabricated hash.
 
 ## How to run
 
 ```powershell
 npm run evals          # deterministic harness; exit 0 = all green
-npm test               # node --test tests/*.test.mjs (data integrity, completeness,
-                       # schemas, hooks, digest)
-npm run demo           # full E2E gate + on-camera checklist
+npm test               # node --test: root and broker unit tests
+npm run demo           # original foundry E2E refusal (expected exit 3)
 node scripts/run-evals.mjs --live
 ```
+
+Run these npm commands inside the development image, not with dependencies
+installed in the checkout. See [Development](../docs/DEVELOPMENT.md), including
+the guard+mutation guide. `npm run demo` is distinct from `heatlot demo`, which
+runs the supplier PDF hero packet.
 
 `--live` runs **no models**. It prints the exact
 `claude -p "<prompt>" --max-turns 15` command per case so a human can run the

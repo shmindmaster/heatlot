@@ -8,13 +8,13 @@ derived from untrusted input. Every mint, refusal, use and outcome is an Ed25519
 hash-chained receipt that anyone with the public key can verify offline.
 
 It is the extracted core of this repository's effect broker, kept as an internal package
-(`private: true`) until it ships inside the public `heatlot` package. Zero dependencies.
-Node 20 or later.
+(`private: true`), and shipped through the public `heatlot/broker` export. It is not
+published separately as `@heatlot/broker`. Zero dependencies. Node 22.13 or later.
 
 ## Wrap a tool in three lines
 
 ```js
-import { Broker } from '@heatlot/broker';
+import { Broker } from 'heatlot/broker';
 const broker = new Broker({ dir: '.heatlot', privateKey: process.env.HEATLOT_SIGNING_KEY });
 const sendEmail = broker.guard('send_email', realSendEmail);
 ```
@@ -33,7 +33,7 @@ const sendEmail = broker.guard('send_email', realSendEmail);
 ## Approve, and refuse anything downstream of untrusted content
 
 ```js
-import { trusted, untrusted } from '@heatlot/broker';
+import { trusted, untrusted } from 'heatlot/broker';
 
 const authorization = broker.approve('send_email', payload, {
   by: 'alice@example.com',                       // a human, or deterministic code you trust
@@ -49,12 +49,15 @@ The model can read untrusted content and draft whatever it likes. What it cannot
 content into an authorization: the inputs that fed a decision are bound into the mint, and any
 untrusted one blocks it.
 
-## Proxy an MCP server
+## Proxy an MCP server (repository checkout)
 
 ```bash
 node packages/broker/bin/broker.mjs keygen --dir .heatlot
 node packages/broker/bin/broker.mjs mcp-proxy --dir .heatlot -- node your-mcp-server.mjs
 ```
+
+The proxy CLI is in the checkout; the root npm package ships the library source,
+not `packages/broker/bin/`. Run these commands inside the development image.
 
 Configure your MCP client to launch the proxy instead of the server. Tools annotated
 `readOnlyHint: true` pass through with a receipt. Every other tool call (including a tool the proxy

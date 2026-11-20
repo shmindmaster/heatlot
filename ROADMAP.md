@@ -8,8 +8,7 @@ without turning the repository into a hosted product.
 
 - Keep the offline replay path, full verification suite, mutation harness, and
   synthetic corpus green on supported Node.js versions.
-- Publish a versioned first release once CI and the public contribution surface
-  have been exercised on the public repository.
+- Maintain the published v0.4.0 npm package, CLI, HTTP API, MCP tools and inspection console.
 - Add more adversarial cases around policy parsing, authorization binding, and
   provider-schema differences.
 - Keep the release gate's floors (`evals/gate.json`) rising with the suite; the
@@ -17,8 +16,10 @@ without turning the repository into a hosted product.
 
 ## Next
 
-- Extract the control-layer primitives behind a small, documented API without
-  weakening the executable reference implementation.
+- Evolve the extracted `heatlot/broker` API without weakening the executable
+  reference implementation; keep the workspace package private until a separate release is justified.
+- Add live PDF extraction with recorded provenance; inspection currently uses
+  authored replay or a deterministic reference reader, not the live typed-decision adapters.
 - Add a second synthetic domain port that demonstrates which parts are reusable
   and which must remain domain-owned.
 - Add an optional external ledger anchor and measure the guarantees it adds.

@@ -8,7 +8,39 @@ what the design stops, what it does not, and what it merely makes findable.
 
 The scope is a single deployment of this repository: one agent system, one
 document corpus, one operator. Multi-tenant isolation, key management and
-transport security are out of scope — nothing here runs as a service.
+transport security are out of scope — the shipped HTTP server is a local reference
+interface, not an authenticated production service.
+
+## Current packet inspection boundary
+
+Sections 2–5 below describe the original foundry completeness/publish example.
+The supplier-PDF path adds a distinct boundary:
+
+- `src/inspection/inspect.mjs` checks manifest file hashes, extracts numbered PDF
+  lines and labels hidden or instruction-shaped lines untrusted. Citation checks
+  admit values only from visible, matching lines in the correct document.
+- `src/inspection/rules.mjs` computes ACCEPT, INCOMPLETE or NONCONFORMING from
+  generated specification requirements, not from the model's draft verdict.
+  This is evidence checking, not a semantic proof that every extracted field is correct.
+- Approval requires ACCEPT and refuses any flagged input line, even if a clean
+  subset would support acceptance. `packages/broker` binds a single-use
+  authorization to the exact decision; release rechecks packet PDF hashes.
+- Packet receipts are Ed25519-signed under `HEATLOT_OUT/<packet>/` (default
+  `.heatlot/<packet>/`), with keys under `HEATLOT_OUT/keys/`. Rewriting signed
+  history requires the private key; there is still no external anchor. This is
+  stronger than the original unsigned `ledger/` chain discussed below.
+
+The HTTP API has no authentication or user directory; `by` is caller-supplied.
+Only loopback is bound by the CLI. Treat host access, stored inspection files,
+specification data, keys and process configuration as trusted. MCP exposes no
+approve or release tools. A local shell can bypass these application controls;
+the publish hook is not a sandbox or a universal OS write interceptor.
+
+Hidden-text checks cover tiny type and subtext-scan drawing-state checks, not OCR,
+text over photographs or tampered font maps. Citation matching checks tokens and
+numbers, not semantic correctness. Concurrent writers are not serialized: use one
+broker process per ledger. See [Integrations](INTEGRATIONS.md) for provider scope;
+live typed-decision adapters are not live PDF extraction.
 
 ## 1.1 What is being protected
 

@@ -21,10 +21,15 @@ in the checkout. Do not set `HEATLOT_LIVE` for these commands.
 - Offline after the image exists. Live calls are `npm run verify:live` with
   `HEATLOT_LIVE=1` only.
 - Seeded generators, logical counters, no wall clock in compared output.
-- Fail closed. No override path around `src/effects/broker.mjs`.
-- Dataset changes go through `scripts/generate-data.mjs`. Do not hand-edit `data/`.
+- Fail closed. No override path around `src/effects/broker.mjs` (foundry publish)
+  or `src/inspection/inspect.mjs` through `packages/broker` (material release).
+- Foundry dataset changes go through `scripts/generate-data.mjs`; supplier packets
+  and specs use `scripts/packets-world.mjs` and `scripts/generate-packets.mjs`.
+  Do not hand-edit `data/`.
 - A new guard needs a mutation in `evals/mutations/`.
-- Rules live in `policy/policy.json`. `data/`, `references/`, and `schemas/`
+- Foundry permissions and tripwires live in `policy/policy.json`; inspection
+  requirements come from generated `data/specs/` and `src/inspection/rules.mjs`.
+  `data/`, `references/`, and `schemas/`
   are not agent-writable; `hooks/publish-gate.mjs` enforces that.
   Draft reports go to `reports/drafts/`.
 - A decision-scope change updates `schemas/`, `policy/policy.json`,

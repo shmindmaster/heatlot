@@ -16,6 +16,8 @@ Git, Docker, and an editor are enough.
 
 ```bash
 docker compose run --build --rm verify
+docker compose run --rm gate
+docker compose run --rm drill
 ```
 
 The suite runs without an API key or a network call. It exercises both
@@ -24,6 +26,11 @@ successful and refused outcomes; the wrapper checks each expected exit code.
 If you change generated data, edit `scripts/generate-data.mjs` and regenerate it.
 Do not hand-edit files under `data/`. If you add or weaken a guard, add a mutation
 that proves the suite detects the corresponding failure.
+
+Supplier PDF packets use `scripts/packets-world.mjs` and `generate:packets`,
+not the foundry generator. [Development](docs/DEVELOPMENT.md) covers guard and
+mutation authoring, documentation checks and the no-checkout-dependencies rule;
+[Data](docs/DATA.md) explains both generated corpora. Keep `HEATLOT_LIVE` unset.
 
 ## Pull requests
 

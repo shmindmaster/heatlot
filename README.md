@@ -89,8 +89,9 @@ the repository:
 
 ```bash
 git clone https://github.com/shmindmaster/heatlot
-cd heatlot && npm install
-npm run heatlot -- verify data/packets/PKT-24002
+cd heatlot
+docker compose run --build --rm verify
+docker compose run --rm verify npm run heatlot -- verify data/packets/PKT-24002
 ```
 
 The model draft for this packet is a scripted stand-in for a model that believed the hidden note,
@@ -116,6 +117,8 @@ visible lines support. The supplier's corrected resubmission is accepted, and it
 authorization works once:
 
 ```bash
+# Run these npm commands inside the image:
+# docker compose run --rm verify sh
 npm run heatlot -- verify  data/packets/PKT-24002R                       # ACCEPT, exit 0
 npm run heatlot -- approve data/packets/PKT-24002R --by "J. Mendez"      # single-use authorization
 npm run heatlot -- release data/packets/PKT-24002R                       # released
@@ -124,7 +127,9 @@ npm run heatlot -- receipts data/packets/PKT-24002R                      # signe
 npm run evals:mutate                                                     # every guard removed in turn, each caught
 ```
 
-Exit codes: `0` ACCEPT, `3` INCOMPLETE, `4` NONCONFORMING, `5` refused by the broker.
+Exit codes: `0` ACCEPT, `3` INCOMPLETE, `4` NONCONFORMING, `5` refused by the broker;
+`2` is a usage or operational error. See [Development](docs/DEVELOPMENT.md) for container commands
+and [Integrations](docs/INTEGRATIONS.md) for API, MCP and provider configuration.
 
 The repository ships eight synthetic packets in `data/packets/`, covering ACCEPT, INCOMPLETE and
 NONCONFORMING outcomes.
@@ -184,8 +189,7 @@ of the exact decision payload, can be used once, and is refused when any input t
 decision was untrusted.
 
 The broker is extracted as [`packages/broker`](packages/broker/), a zero-dependency library that
-can guard any tool function or sit in front of an MCP server. It is internal until it ships
-inside the `heatlot` package.
+can guard any tool function or sit in front of an MCP server. It ships via `heatlot/broker`; the workspace package is private and is not published separately.
 
 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) covers each surface and maps it to Anthropic's and
 OpenAI's published agent guidance. [`docs/SECURITY.md`](docs/SECURITY.md) states what the
@@ -205,7 +209,7 @@ GitHub release and the npm publish ([DEPLOYMENT.md](docs/DEPLOYMENT.md)).
 | Extraction with page and line citations | **Done** with replayed, authored extractions, which the output labels as such; a live model adapter for extraction is planned |
 | Specification rules, verdicts, single-use release, quarantine and NCR | **Done**, CLI `heatlot verify` |
 | HTTP API with a generated OpenAPI 3.1 document and Scalar docs; MCP server | **Done**, `heatlot serve`, `/docs/api` |
-| Inspection console: queue, PDF with cited highlights, rule-by-rule verdict, release, receipt chain | **Done**, `npm run serve` then http://127.0.0.1:4140 |
+| Inspection console: queue, PDF with cited highlights, rule-by-rule verdict, release, receipt chain | **Done**, `npx heatlot@0.4.0 serve` then http://127.0.0.1:4140 |
 | npm package `heatlot` | **Published** v0.4.0 — `npx heatlot demo` |
 
 Specification tables are modelled on the shape of public material specifications; no
@@ -264,7 +268,7 @@ nothing to enforce it.
 | `npm run smoke:package` | The npm package installs from its tarball and runs on its own |
 | `npm run smoke:mcp` / `conformance:mcp` | The MCP server across both protocol eras, plus the official conformance suite with a baseline that may only shrink |
 
-CI runs all of it in Docker on Ubuntu. The evidence behind each claim, with run IDs, is in
+CI runs all of it in Docker on Ubuntu. Verification details and recorded live-run locations are in
 [`docs/OPERATIONS.md`](docs/OPERATIONS.md) and [`docs/TESTING.md`](docs/TESTING.md).
 
 ## Contributing, security and license
