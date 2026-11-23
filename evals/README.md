@@ -68,7 +68,9 @@ runs the supplier PDF hero packet.
 `--live` runs **no models**. It prints the exact
 `claude -p "<prompt>" --max-turns 15` command per case so a human can run the
 behavioral side on camera and compare what the subagent does against the
-`expect` block in `evals/cases/<id>.json`.
+`expect` block in `evals/cases/<id>.json`. The printed commands use POSIX
+shell quoting; paste them into bash or zsh (for example inside the
+development image), not PowerShell.
 
 ## The producer/reviewer rule
 
