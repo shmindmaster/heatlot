@@ -37,7 +37,7 @@ export function readFields(doc, lines) {
       fields.spec_id = { value: m[1], cite: cite(doc, line) };
       fields.spec_revision = { value: m[2], cite: cite(doc, line) };
     }
-    if ((m = line.text.match(/^Signed:\s*(.+)$/))) fields.signatory = { value: m[1], cite: cite(doc, line) };
+    if ((m = line.text.match(/^Signed:\s*(\S.*)$/))) fields.signatory = { value: m[1], cite: cite(doc, line) };
     if (doc === 'coc' && (m = line.text.match(/^Customer PO:\s*(PO-\d+)/))) fields.customer_po = { value: m[1], cite: cite(doc, line) };
     if (doc === 'mtr') {
       const header = line.text.split(/\s+/);
