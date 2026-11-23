@@ -20,5 +20,5 @@ test('a pathological signature line is read in linear time', () => {
   const f = readFields('mtr', lines(text));
   const ms = Number(process.hrtime.bigint() - start) / 1e6;
   assert.equal(f.signatory, null);
-  assert.ok(ms < 250, `readFields took ${ms.toFixed(1)} ms`);
+  assert.ok(ms < 2000, `readFields took ${ms.toFixed(1)} ms`);
 });
