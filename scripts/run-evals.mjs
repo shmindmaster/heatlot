@@ -259,12 +259,16 @@ function checkSchemaFixtures() {
 }
 
 // ---------- modes ----------
+export function shellDoubleQuote(value) {
+  return `"${String(value).replace(/[\\"$`]/g, '\\$&')}"`;
+}
+
 function runLive(cases) {
   console.log('LIVE MODE — no models are run by this harness. A human runs each prompt');
   console.log('behaviorally and compares the subagent behavior against evals/cases/<id>.json:\n');
   for (const c of cases) {
     console.log(`# ${c.id} (subagent: ${c.subagent})`);
-    console.log(`claude -p "${String(c.prompt).replace(/"/g, '\\"')}" --max-turns 15\n`);
+    console.log(`claude -p ${shellDoubleQuote(c.prompt)} --max-turns 15\n`);
   }
   console.log(`${cases.length} case(s) listed. Producer/reviewer rule: agents produce artifacts;`);
   console.log('this harness + the schemas judge them. An agent never grades itself.');
@@ -316,4 +320,4 @@ function main() {
   process.exit(failed.length === 0 ? 0 : 1);
 }
 
-main();
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();
