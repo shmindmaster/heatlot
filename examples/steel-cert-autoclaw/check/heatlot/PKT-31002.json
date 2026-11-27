@@ -1,0 +1,425 @@
+{
+  "packet": "PKT-31002",
+  "verdict": "ACCEPT",
+  "reasons": [],
+  "findings": [
+    {
+      "rule": "required-test-present:chemistry",
+      "status": "pass",
+      "reason": "chemistry results are present and cited.",
+      "cites": [
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 10,
+          "text": "0.430 0.880 0.012 0.018 0.240 0.960 0.250",
+          "sha256": "a6e8aa448cb25c36de8ab52b41e8dd34fe6dd26c903e320fd82133c4a49e6cc7"
+        },
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 10,
+          "text": "0.430 0.880 0.012 0.018 0.240 0.960 0.250",
+          "sha256": "a6e8aa448cb25c36de8ab52b41e8dd34fe6dd26c903e320fd82133c4a49e6cc7"
+        },
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 10,
+          "text": "0.430 0.880 0.012 0.018 0.240 0.960 0.250",
+          "sha256": "a6e8aa448cb25c36de8ab52b41e8dd34fe6dd26c903e320fd82133c4a49e6cc7"
+        },
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 10,
+          "text": "0.430 0.880 0.012 0.018 0.240 0.960 0.250",
+          "sha256": "a6e8aa448cb25c36de8ab52b41e8dd34fe6dd26c903e320fd82133c4a49e6cc7"
+        },
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 10,
+          "text": "0.430 0.880 0.012 0.018 0.240 0.960 0.250",
+          "sha256": "a6e8aa448cb25c36de8ab52b41e8dd34fe6dd26c903e320fd82133c4a49e6cc7"
+        },
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 10,
+          "text": "0.430 0.880 0.012 0.018 0.240 0.960 0.250",
+          "sha256": "a6e8aa448cb25c36de8ab52b41e8dd34fe6dd26c903e320fd82133c4a49e6cc7"
+        },
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 10,
+          "text": "0.430 0.880 0.012 0.018 0.240 0.960 0.250",
+          "sha256": "a6e8aa448cb25c36de8ab52b41e8dd34fe6dd26c903e320fd82133c4a49e6cc7"
+        }
+      ]
+    },
+    {
+      "rule": "required-test-present:tensile",
+      "status": "pass",
+      "reason": "tensile results are present and cited.",
+      "cites": [
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 12,
+          "text": "Tensile strength: 95 ksi",
+          "sha256": "f3318e11db33d62ddd4a968e108da4012a161445f7eae97b092c778f1e4fa40b"
+        },
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 13,
+          "text": "Yield strength (0.2% offset): 60 ksi",
+          "sha256": "5a6b58c1ec1847714ee6880a0df6ba18b3ebe482aec1afd68decf09916fdffdd"
+        },
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 14,
+          "text": "Elongation in 2 in: 20 %",
+          "sha256": "41bff8d00a5468c239863cc2af26d19c01de75bd7db0111a7dc08a331bb08959"
+        }
+      ]
+    },
+    {
+      "rule": "required-test-present:hardness",
+      "status": "pass",
+      "reason": "hardness results are present and cited.",
+      "cites": [
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 15,
+          "text": "Hardness: 255 HB",
+          "sha256": "b4f404b57bbd6c88f2ed6cc25b0c36d3944394bc1059d452149f190b81814d36"
+        }
+      ]
+    },
+    {
+      "rule": "chemistry-in-range:C",
+      "status": "pass",
+      "reason": "C 0.43 wt% within min 0.38, max 0.43.",
+      "cites": [
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 10,
+          "text": "0.430 0.880 0.012 0.018 0.240 0.960 0.250",
+          "sha256": "a6e8aa448cb25c36de8ab52b41e8dd34fe6dd26c903e320fd82133c4a49e6cc7"
+        }
+      ]
+    },
+    {
+      "rule": "chemistry-in-range:Mn",
+      "status": "pass",
+      "reason": "Mn 0.88 wt% within min 0.75, max 1.",
+      "cites": [
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 10,
+          "text": "0.430 0.880 0.012 0.018 0.240 0.960 0.250",
+          "sha256": "a6e8aa448cb25c36de8ab52b41e8dd34fe6dd26c903e320fd82133c4a49e6cc7"
+        }
+      ]
+    },
+    {
+      "rule": "chemistry-in-range:P",
+      "status": "pass",
+      "reason": "P 0.012 wt% within max 0.035.",
+      "cites": [
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 10,
+          "text": "0.430 0.880 0.012 0.018 0.240 0.960 0.250",
+          "sha256": "a6e8aa448cb25c36de8ab52b41e8dd34fe6dd26c903e320fd82133c4a49e6cc7"
+        }
+      ]
+    },
+    {
+      "rule": "chemistry-in-range:S",
+      "status": "pass",
+      "reason": "S 0.018 wt% within max 0.04.",
+      "cites": [
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 10,
+          "text": "0.430 0.880 0.012 0.018 0.240 0.960 0.250",
+          "sha256": "a6e8aa448cb25c36de8ab52b41e8dd34fe6dd26c903e320fd82133c4a49e6cc7"
+        }
+      ]
+    },
+    {
+      "rule": "chemistry-in-range:Si",
+      "status": "pass",
+      "reason": "Si 0.24 wt% within min 0.15, max 0.35.",
+      "cites": [
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 10,
+          "text": "0.430 0.880 0.012 0.018 0.240 0.960 0.250",
+          "sha256": "a6e8aa448cb25c36de8ab52b41e8dd34fe6dd26c903e320fd82133c4a49e6cc7"
+        }
+      ]
+    },
+    {
+      "rule": "chemistry-in-range:Cr",
+      "status": "pass",
+      "reason": "Cr 0.96 wt% within min 0.8, max 1.1.",
+      "cites": [
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 10,
+          "text": "0.430 0.880 0.012 0.018 0.240 0.960 0.250",
+          "sha256": "a6e8aa448cb25c36de8ab52b41e8dd34fe6dd26c903e320fd82133c4a49e6cc7"
+        }
+      ]
+    },
+    {
+      "rule": "chemistry-in-range:Mo",
+      "status": "pass",
+      "reason": "Mo 0.25 wt% within min 0.15, max 0.25.",
+      "cites": [
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 10,
+          "text": "0.430 0.880 0.012 0.018 0.240 0.960 0.250",
+          "sha256": "a6e8aa448cb25c36de8ab52b41e8dd34fe6dd26c903e320fd82133c4a49e6cc7"
+        }
+      ]
+    },
+    {
+      "rule": "mechanical-in-range:tensile_ksi",
+      "status": "pass",
+      "reason": "tensile_ksi 95 within min 95.",
+      "cites": [
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 12,
+          "text": "Tensile strength: 95 ksi",
+          "sha256": "f3318e11db33d62ddd4a968e108da4012a161445f7eae97b092c778f1e4fa40b"
+        }
+      ]
+    },
+    {
+      "rule": "mechanical-in-range:yield_ksi",
+      "status": "pass",
+      "reason": "yield_ksi 60 within min 60.",
+      "cites": [
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 13,
+          "text": "Yield strength (0.2% offset): 60 ksi",
+          "sha256": "5a6b58c1ec1847714ee6880a0df6ba18b3ebe482aec1afd68decf09916fdffdd"
+        }
+      ]
+    },
+    {
+      "rule": "mechanical-in-range:elongation_pct",
+      "status": "pass",
+      "reason": "elongation_pct 20 within min 20.",
+      "cites": [
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 14,
+          "text": "Elongation in 2 in: 20 %",
+          "sha256": "41bff8d00a5468c239863cc2af26d19c01de75bd7db0111a7dc08a331bb08959"
+        }
+      ]
+    },
+    {
+      "rule": "mechanical-in-range:hardness_hb",
+      "status": "pass",
+      "reason": "hardness_hb 255 within max 255.",
+      "cites": [
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 15,
+          "text": "Hardness: 255 HB",
+          "sha256": "b4f404b57bbd6c88f2ed6cc25b0c36d3944394bc1059d452149f190b81814d36"
+        }
+      ]
+    },
+    {
+      "rule": "spec-revision-match:mtr",
+      "status": "pass",
+      "reason": "The mtr certifies HLS-4140 Rev C, as the PO requires.",
+      "cites": [
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 6,
+          "text": "Specification: HLS-4140 Rev C",
+          "sha256": "f0ffb43ce3cf3ccd80aeaddcd7d035a1845398cd136504ed3b5a149e44e55182"
+        }
+      ]
+    },
+    {
+      "rule": "spec-revision-match:coc",
+      "status": "pass",
+      "reason": "The coc certifies HLS-4140 Rev C, as the PO requires.",
+      "cites": [
+        {
+          "doc": "coc",
+          "page": 1,
+          "line": 8,
+          "text": "Specification: HLS-4140 Rev C",
+          "sha256": "f0ffb43ce3cf3ccd80aeaddcd7d035a1845398cd136504ed3b5a149e44e55182"
+        }
+      ]
+    },
+    {
+      "rule": "heat-traceability",
+      "status": "pass",
+      "reason": "PO PO-40127 → CoC → heat OV-61219 on the mill test report.",
+      "cites": [
+        {
+          "doc": "coc",
+          "page": 1,
+          "line": 4,
+          "text": "Customer PO: PO-40127 Line: 1",
+          "sha256": "a8a7d73f4dcf823545da05742991583dff6f2dd91a70c4d75fcdb24acfb72612"
+        },
+        {
+          "doc": "coc",
+          "page": 1,
+          "line": 7,
+          "text": "Heat No: OV-61219",
+          "sha256": "097ff59f9f95e6de7042a5e017588adbb59f542fe07ebc52797db9e4379e23eb"
+        },
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 4,
+          "text": "Heat No: OV-61219",
+          "sha256": "097ff59f9f95e6de7042a5e017588adbb59f542fe07ebc52797db9e4379e23eb"
+        }
+      ]
+    },
+    {
+      "rule": "required-statement-present:heat-traceability",
+      "status": "pass",
+      "reason": "The certificate identifies the heat number of the material supplied",
+      "cites": [
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 4,
+          "text": "Heat No: OV-61219",
+          "sha256": "097ff59f9f95e6de7042a5e017588adbb59f542fe07ebc52797db9e4379e23eb"
+        },
+        {
+          "doc": "coc",
+          "page": 1,
+          "line": 7,
+          "text": "Heat No: OV-61219",
+          "sha256": "097ff59f9f95e6de7042a5e017588adbb59f542fe07ebc52797db9e4379e23eb"
+        }
+      ]
+    },
+    {
+      "rule": "required-statement-present:spec-and-revision",
+      "status": "pass",
+      "reason": "The certificate names the specification and its revision",
+      "cites": [
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 6,
+          "text": "Specification: HLS-4140 Rev C",
+          "sha256": "f0ffb43ce3cf3ccd80aeaddcd7d035a1845398cd136504ed3b5a149e44e55182"
+        },
+        {
+          "doc": "coc",
+          "page": 1,
+          "line": 8,
+          "text": "Specification: HLS-4140 Rev C",
+          "sha256": "f0ffb43ce3cf3ccd80aeaddcd7d035a1845398cd136504ed3b5a149e44e55182"
+        }
+      ]
+    },
+    {
+      "rule": "required-statement-present:domestic-melt",
+      "status": "pass",
+      "reason": "A statement that the material was melted and manufactured domestically",
+      "cites": [
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 17,
+          "text": "Material was melted and manufactured in the United States of America.",
+          "sha256": "b9fc116c1c425bf0c07cb8b33dd7ed6c8a5f24a566e8ae693b26f6ab9c692a79"
+        }
+      ]
+    },
+    {
+      "rule": "required-statement-present:mercury-free",
+      "status": "pass",
+      "reason": "A statement that the material is free of mercury contamination",
+      "cites": [
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 18,
+          "text": "Material is free of mercury contamination; no mercury-bearing equipment was used in its manufacture.",
+          "sha256": "e7a05d94cbd71dec5e87c20b543902e3c5e53db85b6316b7432ca6baccc43b06"
+        }
+      ]
+    },
+    {
+      "rule": "required-statement-present:conformance-signature",
+      "status": "pass",
+      "reason": "A signed statement of conformance with the signatory's name and title",
+      "cites": [
+        {
+          "doc": "mtr",
+          "page": 1,
+          "line": 20,
+          "text": "Signed: R. Okafor, Quality Assurance Manager",
+          "sha256": "d2c881aee4a62020f2df6cf6a05b84da0ba306e1109cce331d39f9918f0f2162"
+        },
+        {
+          "doc": "coc",
+          "page": 1,
+          "line": 11,
+          "text": "Signed: D. Varga, Quality Manager",
+          "sha256": "4ee03ae05ae7a6437fb1034b6af4eeb1c05af035c8cf1b9829901dd817910cde"
+        }
+      ]
+    }
+  ],
+  "rejected": [],
+  "untrusted": [],
+  "decision": {
+    "packet": "PKT-31002",
+    "po": "PO-40127",
+    "verdict": "ACCEPT",
+    "reasons": [],
+    "files": {
+      "mtr": "df913ec9cd540b34bb2b9db508f4261f0373c4033e617eb6e9b356ad49c467a6",
+      "coc": "0737b6b373bafecf7e83a835efad289ada828f394483ab7ca8970a4dc8749c15"
+    },
+    "spec": {
+      "id": "HLS-4140",
+      "revision": "C",
+      "sha256": "a11cceb64bbb813484476719cba97683eceb6f8d296a5465f8084256f16db508"
+    },
+    "findings_sha256": "1652b2ef028b7adcc2948f666573f0c33cca20bdfa6ea7f37a4d44e756992041"
+  },
+  "ncr": null
+}
