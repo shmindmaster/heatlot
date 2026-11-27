@@ -1,0 +1,4 @@
+generator/node_modules/
+generator/packets/
+generator/package-lock.json
+.heatlot/

@@ -1,0 +1,34 @@
+{
+  "PKT-31001": {
+    "verdict": "ACCEPT",
+    "reasons": []
+  },
+  "PKT-31002": {
+    "verdict": "ACCEPT",
+    "reasons": []
+  },
+  "PKT-31003": {
+    "verdict": "NONCONFORMING",
+    "reasons": [
+      "chemistry-out-of-range:Mo"
+    ]
+  },
+  "PKT-31004": {
+    "verdict": "NONCONFORMING",
+    "reasons": [
+      "mechanical-out-of-range:elongation_pct"
+    ]
+  },
+  "PKT-31005": {
+    "verdict": "INCOMPLETE",
+    "reasons": [
+      "heat-traceability-broken"
+    ]
+  },
+  "PKT-31006": {
+    "verdict": "NONCONFORMING",
+    "reasons": [
+      "mechanical-out-of-range:hardness_hb"
+    ]
+  }
+}
